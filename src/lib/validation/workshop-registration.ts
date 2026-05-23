@@ -9,7 +9,7 @@ export const financialCategoryValues = [
 
 export type FinancialCategory = (typeof financialCategoryValues)[number];
 
-const receiptPathPattern = /^anonymous\/[0-9a-f-]{36}\/receipt-[0-9]+\.[a-z0-9]+$/i;
+const paystackReferencePattern = /^emp_(app|wks)_[a-z0-9]{8,40}$/i;
 
 export const workshopRegistrationSchema = z
   .object({
@@ -41,29 +41,29 @@ export const workshopRegistrationSchema = z
       .trim()
       .min(1, 'Please share your questions for the workshop')
       .max(4000, 'Response is too long'),
-    receiptStoragePath: z
+    paymentReference: z
       .string()
       .trim()
-      .max(500)
+      .max(120)
       .optional()
       .nullable(),
   })
   .superRefine((data, ctx) => {
     if (data.isMember === 'no') {
-      const path = data.receiptStoragePath?.trim();
-      if (!path) {
+      const ref = data.paymentReference?.trim();
+      if (!ref) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'Payment receipt is required for non-members.',
-          path: ['receiptStoragePath'],
+          message: 'Paystack payment is required for non-members.',
+          path: ['paymentReference'],
         });
         return;
       }
-      if (!receiptPathPattern.test(path)) {
+      if (!paystackReferencePattern.test(ref)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'Invalid receipt reference.',
-          path: ['receiptStoragePath'],
+          message: 'Invalid payment reference.',
+          path: ['paymentReference'],
         });
       }
     }
@@ -71,6 +71,7 @@ export const workshopRegistrationSchema = z
 
 export type WorkshopRegistrationInput = z.infer<typeof workshopRegistrationSchema>;
 
+/** Legacy receipt uploads (pre-Paystack). */
 export function isValidWorkshopReceiptPath(path: string): boolean {
-  return receiptPathPattern.test(path.trim());
+  return /^anonymous\/[0-9a-f-]{36}\/receipt-[0-9]+\.[a-z0-9]+$/i.test(path.trim());
 }

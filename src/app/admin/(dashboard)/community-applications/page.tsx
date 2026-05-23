@@ -34,7 +34,8 @@ export type ApplicationRow = {
   portrait_storage_path: string;
   referral_source: string;
   referral_other: string | null;
-  receipt_storage_path: string;
+  receipt_storage_path: string | null;
+  payment_reference: string | null;
 };
 
 const CSV_COLUMNS: { key: keyof ApplicationRow; header: string }[] = [
@@ -60,7 +61,8 @@ const CSV_COLUMNS: { key: keyof ApplicationRow; header: string }[] = [
   { key: 'portrait_storage_path', header: 'Portrait storage path' },
   { key: 'referral_source', header: 'Referral source' },
   { key: 'referral_other', header: 'Referral other' },
-  { key: 'receipt_storage_path', header: 'Receipt storage path' },
+  { key: 'payment_reference', header: 'Paystack reference' },
+  { key: 'receipt_storage_path', header: 'Receipt storage path (legacy)' },
 ];
 
 function formatWhen(iso: string): string {
@@ -253,12 +255,12 @@ const COLUMN_DEFS: ColDef[] = [
     cell: (r) => r.referral_other ?? '—',
   },
   {
-    id: 'receipt',
-    label: 'Receipt path',
+    id: 'payment_reference',
+    label: 'Paystack ref',
     compact: true,
     mono: true,
-    title: (r) => r.receipt_storage_path,
-    cell: (r) => r.receipt_storage_path,
+    title: (r) => r.payment_reference ?? r.receipt_storage_path ?? '',
+    cell: (r) => r.payment_reference ?? r.receipt_storage_path ?? '—',
   },
   {
     id: 'user_id',

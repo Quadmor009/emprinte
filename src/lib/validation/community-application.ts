@@ -44,6 +44,8 @@ export const referralSourceSchema = z.enum([
   'other',
 ]);
 
+const paystackReferencePattern = /^emp_(app|wks)_[a-z0-9]{8,40}$/i;
+
 export const communityApplicationSubmitSchema = z
   .object({
     firstName: z.string().trim().min(1).max(120),
@@ -67,7 +69,7 @@ export const communityApplicationSubmitSchema = z
     commitmentScale: z.coerce.number().int().min(1).max(10),
     readingGoals12m: z.string().trim().min(1).max(4000),
     portraitStoragePath: z.string().trim().min(1).max(500),
-    receiptStoragePath: z.string().trim().min(1).max(500),
+    paymentReference: z.string().trim().min(1).max(120),
     referralSource: referralSourceSchema,
     referralOther: z.string().trim().max(500).optional().nullable(),
   })
@@ -78,6 +80,13 @@ export const communityApplicationSubmitSchema = z
         code: z.ZodIssueCode.custom,
         message: 'Invalid date of birth',
         path: ['dateOfBirth'],
+      });
+    }
+    if (!paystackReferencePattern.test(data.paymentReference)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Invalid payment reference.',
+        path: ['paymentReference'],
       });
     }
     if (data.bookTypes.includes('other')) {

@@ -43,25 +43,17 @@ export const WORKSHOP_STEP_MONEY = {
   subtitle: 'Honest answers help us shape examples and Q&A for the room.',
 } as const;
 
+export const WORKSHOP_FEE_NAIRA = '5,000';
+
 export const WORKSHOP_STEP_PAYMENT = {
   short: 'Pay',
   title: 'Workshop fee',
-  subtitle: 'Non-members pay the workshop fee before we confirm your seat.',
+  subtitle: 'Pay securely with Paystack before we confirm your seat.',
 } as const;
-
-export const WORKSHOP_BANK_DETAILS = {
-  bank: 'Zenith Bank',
-  accountName: 'Emprinte Readers Hub',
-  accountNumber: '1228370098',
-} as const;
-
-export const WORKSHOP_FEE_NAIRA = '5,000';
 
 export const WORKSHOP_PAYMENT_COPY = {
   heading: 'Non-members',
   feeLine: `You are required to pay a workshop fee of ₦${WORKSHOP_FEE_NAIRA} before proceeding.`,
-  receiptHint: 'Attach your payment receipt below.',
-  uploadHelp: 'Upload 1 supported file. Max 10 MB.',
 } as const;
 
 export const WORKSHOP_PAGE_COPY = {

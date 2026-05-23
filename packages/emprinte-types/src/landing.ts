@@ -38,5 +38,6 @@ export interface WorkshopRegistrationRow {
   finance_challenges: string;
   workshop_questions: string;
   receipt_storage_path: string | null;
+  payment_reference: string | null;
   submitted_at: string;
 }

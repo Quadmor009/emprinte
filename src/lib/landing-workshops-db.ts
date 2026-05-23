@@ -1,4 +1,12 @@
-import { createSupabaseServiceRoleClient } from '@/lib/supabase/db';
+import {
+  createSupabaseAnonClient,
+  createSupabaseServiceRoleClient,
+} from '@/lib/supabase/db';
+
+/** Public workshop rows; anon key is enough when service role is unset locally. */
+function workshopReadClient() {
+  return createSupabaseServiceRoleClient() ?? createSupabaseAnonClient();
+}
 
 /** App + web workshop row (`public.challenges`). */
 export type PublicWorkshopRow = {
@@ -52,7 +60,7 @@ function rowToPublic(row: PublicWorkshopRow): WorkshopPublic | null {
 }
 
 export async function fetchWorkshopBySlug(slug: string): Promise<WorkshopPublic | null> {
-  const sb = createSupabaseServiceRoleClient();
+  const sb = workshopReadClient();
   if (!sb) return null;
 
   const normalized = slug.trim().toLowerCase();
@@ -72,7 +80,7 @@ export async function fetchWorkshopBySlug(slug: string): Promise<WorkshopPublic 
 }
 
 export async function fetchWorkshopById(id: string): Promise<WorkshopPublic | null> {
-  const sb = createSupabaseServiceRoleClient();
+  const sb = workshopReadClient();
   if (!sb) return null;
 
   const { data, error } = await sb

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { Suspense } from 'react';
 
 import { WorkshopRegistrationWizard } from '@/components/workshop/WorkshopRegistrationWizard';
 import {
@@ -12,6 +13,14 @@ import { fetchWorkshopBySlug } from '@/lib/landing-workshops-db';
 type PageProps = {
   searchParams: Promise<{ slug?: string }>;
 };
+
+function WorkshopRegisterFallback() {
+  return (
+    <main className="flex min-h-[40vh] items-center justify-center px-4">
+      <p className="font-poppins text-sm text-[#4a5c50]">Loading registration…</p>
+    </main>
+  );
+}
 
 /** Workshop sign-up and payment happen on the web only; the app links here. */
 export default async function WorkshopRegisterPage({ searchParams }: PageProps) {
@@ -43,7 +52,9 @@ export default async function WorkshopRegisterPage({ searchParams }: PageProps) 
           </p>
         </header>
 
-        <WorkshopRegistrationWizard workshop={workshop} pageCopy={pageCopy} />
+        <Suspense fallback={<WorkshopRegisterFallback />}>
+          <WorkshopRegistrationWizard workshop={workshop} pageCopy={pageCopy} />
+        </Suspense>
       </div>
     </main>
   );

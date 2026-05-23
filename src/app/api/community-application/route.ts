@@ -1,23 +1,16 @@
 import { NextResponse } from 'next/server';
 
+import { assertPaystackPayment } from '@/lib/paystack/assert-payment';
+import { APPLICATION_FEE_KOBO } from '@/lib/paystack/constants';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import {
   communityApplicationSubmitSchema,
   type CommunityApplicationSubmitInput,
 } from '@/lib/validation/community-application';
 
-function pathsBelongToUser(
-  userId: string,
-  portraitPath: string,
-  receiptPath: string,
-): boolean {
+function portraitPathBelongsToUser(userId: string, portraitPath: string): boolean {
   const prefix = `${userId}/`;
-  return (
-    portraitPath.startsWith(prefix) &&
-    receiptPath.startsWith(prefix) &&
-    !portraitPath.includes('..') &&
-    !receiptPath.includes('..')
-  );
+  return portraitPath.startsWith(prefix) && !portraitPath.includes('..');
 }
 
 export async function GET() {
@@ -79,7 +72,8 @@ function mapBodyToRow(userId: string, email: string, body: CommunityApplicationS
     portrait_storage_path: body.portraitStoragePath,
     referral_source: body.referralSource,
     referral_other: body.referralOther?.trim() || null,
-    receipt_storage_path: body.receiptStoragePath,
+    payment_reference: body.paymentReference.trim(),
+    receipt_storage_path: null,
   };
 }
 
@@ -116,11 +110,22 @@ export async function POST(request: Request) {
   }
 
   const body = parsed.data;
-  if (!pathsBelongToUser(user.id, body.portraitStoragePath, body.receiptStoragePath)) {
+  if (!portraitPathBelongsToUser(user.id, body.portraitStoragePath)) {
     return NextResponse.json(
-      { error: 'Invalid file paths for this account.' },
+      { error: 'Invalid portrait path for this account.' },
       { status: 400 },
     );
+  }
+
+  const payment = await assertPaystackPayment({
+    reference: body.paymentReference,
+    purpose: 'community_application',
+    expectedAmountKobo: APPLICATION_FEE_KOBO,
+    expectedUserId: user.id,
+    expectedEmail: user.email,
+  });
+  if (!payment.ok) {
+    return NextResponse.json({ error: payment.error }, { status: 402 });
   }
 
   const row = mapBodyToRow(user.id, user.email, body);

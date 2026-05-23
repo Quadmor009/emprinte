@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 
+import { fetchWorkshopById } from '@/lib/landing-workshops-db';
+import { assertPaystackPayment } from '@/lib/paystack/assert-payment';
+import { amountKoboForPurpose } from '@/lib/paystack/server';
 import { createSupabaseServiceRoleClient } from '@/lib/supabase/db';
 import { workshopRegistrationSchema } from '@/lib/validation/workshop-registration';
 
@@ -14,6 +17,7 @@ type WorkshopRow = {
   financeChallenges: string;
   workshopQuestions: string;
   receiptStoragePath: string | null;
+  paymentReference: string | null;
   submittedAt: string;
 };
 
@@ -56,6 +60,25 @@ export async function POST(request: Request) {
   }
 
   const data = parsed.data;
+
+  if (data.isMember === 'no') {
+    const workshop = await fetchWorkshopById(data.workshopId);
+    if (!workshop) {
+      return NextResponse.json({ error: 'Workshop not found.' }, { status: 404 });
+    }
+
+    const payment = await assertPaystackPayment({
+      reference: data.paymentReference!.trim(),
+      purpose: 'workshop_registration',
+      expectedAmountKobo: amountKoboForPurpose('workshop_registration', workshop.feeAmountNaira),
+      expectedEmail: data.email,
+      expectedWorkshopId: data.workshopId,
+    });
+    if (!payment.ok) {
+      return NextResponse.json({ error: payment.error }, { status: 402 });
+    }
+  }
+
   const row = {
     workshop_id: data.workshopId,
     full_name: data.fullName,
@@ -65,8 +88,9 @@ export async function POST(request: Request) {
     financial_category: data.financialCategory,
     finance_challenges: data.financeChallenges,
     workshop_questions: data.workshopQuestions,
-    receipt_storage_path:
-      data.isMember === 'no' ? data.receiptStoragePath?.trim() ?? null : null,
+    receipt_storage_path: null,
+    payment_reference:
+      data.isMember === 'no' ? data.paymentReference?.trim() ?? null : null,
   };
 
   if (isSupabaseReady()) {
@@ -97,8 +121,9 @@ export async function POST(request: Request) {
       financialCategory: data.financialCategory,
       financeChallenges: data.financeChallenges,
       workshopQuestions: data.workshopQuestions,
-      receiptStoragePath:
-        data.isMember === 'no' ? data.receiptStoragePath?.trim() ?? null : null,
+      receiptStoragePath: null,
+      paymentReference:
+        data.isMember === 'no' ? data.paymentReference?.trim() ?? null : null,
       submittedAt: new Date().toISOString(),
     });
     return NextResponse.json({ ok: true });

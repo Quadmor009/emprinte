@@ -31,7 +31,8 @@ const CSV_COLUMNS: { key: keyof WorkshopRegistrationRow; header: string }[] = [
   { key: 'primary_goal', header: 'Primary goal' },
   { key: 'finance_challenges', header: 'Finance challenges' },
   { key: 'workshop_questions', header: 'Workshop questions' },
-  { key: 'receipt_storage_path', header: 'Receipt path' },
+  { key: 'payment_reference', header: 'Paystack reference' },
+  { key: 'receipt_storage_path', header: 'Receipt path (legacy)' },
   { key: 'id', header: 'Registration id' },
 ];
 
@@ -223,7 +224,7 @@ export default function AdminWorkshopRegistrationsPage() {
       id="workshop-registrations-heading"
       eyebrow="People"
       title="Workshop registrations"
-      description="Web sign-ups and in-app join requests for workshops. Non-members on the web include a payment receipt — signed links expire after about an hour."
+      description="Web sign-ups and in-app join requests for workshops. Non-members pay via Paystack on the web; legacy rows may still have receipt uploads."
       actions={headerActions}
     >
       <div className="flex gap-2 rounded-xl border border-[#142218]/10 bg-white p-1 font-poppins text-sm">
@@ -368,7 +369,11 @@ export default function AdminWorkshopRegistrationsPage() {
                     </Td>
                     <Td title={r.primary_goal}>{r.primary_goal}</Td>
                     <Td>
-                      {r.receipt_signed_url ? (
+                      {r.payment_reference ? (
+                        <span className="font-mono text-[10px] text-[#142218]">
+                          {r.payment_reference}
+                        </span>
+                      ) : r.receipt_signed_url ? (
                         <a
                           href={r.receipt_signed_url}
                           target="_blank"

@@ -5,7 +5,11 @@ import { useRouter } from 'next/navigation';
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
+import { PaystackPaymentPanel } from '@/components/payments/PaystackPaymentPanel';
+import { PAYSTACK_CHECKOUT_COPY } from '@/constants/paystack-checkout';
 import { Logo } from '@/components/ui/Logo';
+import { APPLICATION_FEE_NAIRA, PAYSTACK_SESSION_KEYS } from '@/lib/paystack/constants';
+import { startPaystackRedirectCheckout, usePaystackReturn } from '@/lib/paystack/client';
 import { createSupabaseBrowserClient, isSupabaseBrowserConfigured } from '@/lib/supabase/client';
 import type { BookType } from '@/lib/validation/community-application';
 
@@ -37,7 +41,7 @@ const WIZARD_STEPS = [
   { short: 'Plan', title: 'Membership', subtitle: 'Choose the plan you are aiming for after admission.' },
   { short: 'Read', title: 'Your Reading Journey', subtitle: 'Help us understand your habits and interests.' },
   { short: 'Goals', title: 'Commitment & Goals', subtitle: 'Your focus for the year and a clear photo of you.' },
-  { short: 'Pay', title: 'Application Fee', subtitle: 'Bank details and upload your payment receipt.' },
+  { short: 'Pay', title: 'Application Fee', subtitle: 'Pay the application fee securely with Paystack.' },
 ] as const;
 
 /** Full journey: account (done before this screen) + five wizard sections — six steps total. */
@@ -163,7 +167,13 @@ function extFromFile(file: File): string {
   return n.slice(i + 1).toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin';
 }
 
-function validateStep(step: number, f: FormState, portrait: File | null, receipt: File | null): string | null {
+function validateStep(
+  step: number,
+  f: FormState,
+  portrait: File | null,
+  portraitStoragePath: string | null,
+  paymentReference: string | null,
+): string | null {
   switch (step) {
     case 0:
       if (!f.firstName.trim()) return 'Add your first name to continue.';
@@ -192,10 +202,10 @@ function validateStep(step: number, f: FormState, portrait: File | null, receipt
       if (f.referralSource === 'other' && !f.referralOther.trim()) {
         return 'Add how you heard about us.';
       }
-      if (!portrait) return 'Upload a clear portrait (photo or PDF).';
+      if (!portrait && !portraitStoragePath) return 'Upload a clear portrait (photo or PDF).';
       return null;
     case 4:
-      if (!receipt) return 'Upload your ₦3,000 application fee receipt to submit.';
+      if (!paymentReference) return 'Pay the application fee with Paystack before submitting.';
       return null;
     default:
       return null;
@@ -218,10 +228,17 @@ export function CommunityApplicationWizard() {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormState>(initialForm);
   const [portrait, setPortrait] = useState<File | null>(null);
-  const [receipt, setReceipt] = useState<File | null>(null);
+  const [portraitStoragePath, setPortraitStoragePath] = useState<string | null>(null);
+  const [payingPaystack, setPayingPaystack] = useState(false);
   const [busy, setBusy] = useState(false);
   const [sessionEmail, setSessionEmail] = useState<string | null>(null);
   const [alreadySubmitted, setAlreadySubmitted] = useState(false);
+
+  const { paymentReference, verifyingReturn } = usePaystackReturn({
+    purpose: 'community_application',
+    email: sessionEmail ?? undefined,
+    paymentRefStorageKey: PAYSTACK_SESSION_KEYS.applyPaymentRef,
+  });
 
   const totalSteps = WIZARD_STEPS.length;
 
@@ -259,6 +276,24 @@ export function CommunityApplicationWizard() {
     };
   }, [loadStatus]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const raw = sessionStorage.getItem(PAYSTACK_SESSION_KEYS.applyDraft);
+    if (!raw) return;
+    try {
+      const draft = JSON.parse(raw) as {
+        form: FormState;
+        portraitStoragePath: string;
+        step: number;
+      };
+      setForm(draft.form);
+      setPortraitStoragePath(draft.portraitStoragePath);
+      setStep(draft.step);
+    } catch {
+      /* ignore corrupt draft */
+    }
+  }, []);
+
   const currentApplicationStep = step + 2;
 
   const dobInputBounds = useMemo(() => {
@@ -271,7 +306,7 @@ export function CommunityApplicationWizard() {
   }, []);
 
   function nextStep() {
-    const err = validateStep(step, form, portrait, receipt);
+    const err = validateStep(step, form, portrait, portraitStoragePath, paymentReference);
     if (err) {
       toast.error(err);
       return;
@@ -297,15 +332,83 @@ export function CommunityApplicationWizard() {
     }
   }
 
-  async function onSubmit(e: FormEvent) {
-    e.preventDefault();
-    const err = validateStep(4, form, portrait, receipt);
+  async function ensurePortraitUploaded(userId: string): Promise<string | null> {
+    if (portraitStoragePath) return portraitStoragePath;
+    if (!portrait) return null;
+
+    const MAX_BYTES = 10 * 1024 * 1024;
+    if (portrait.size > MAX_BYTES) {
+      toast.error('Portrait must be 10 MB or smaller.');
+      return null;
+    }
+
+    const supabase = createSupabaseBrowserClient();
+    const pExt = extFromFile(portrait);
+    const path = `${userId}/portrait-${Date.now()}.${pExt}`;
+    const { error } = await supabase.storage.from(BUCKET).upload(path, portrait, { upsert: false });
+    if (error) {
+      toast.error(error.message || 'Could not upload your portrait.');
+      return null;
+    }
+    setPortraitStoragePath(path);
+    return path;
+  }
+
+  async function onPayApplicationFee() {
+    const err = validateStep(3, form, portrait, portraitStoragePath, paymentReference);
     if (err) {
       toast.error(err);
       return;
     }
-    if (!portrait || !receipt) {
-      toast.error('Add both uploads before submitting.');
+    if (!sessionEmail?.trim()) {
+      toast.error('Your session ended. Sign up again to continue.');
+      router.replace('/apply/sign-up?next=/apply/form');
+      return;
+    }
+
+    setPayingPaystack(true);
+    try {
+      if (!isSupabaseBrowserConfigured()) {
+        toast.error('Supabase is not configured in this environment.');
+        return;
+      }
+      const supabase = createSupabaseBrowserClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user?.id) {
+        toast.error('Your session ended. Sign up again to continue.');
+        router.replace('/apply/sign-up?next=/apply/form');
+        return;
+      }
+
+      const portraitPath = await ensurePortraitUploaded(user.id);
+      if (!portraitPath) return;
+
+      sessionStorage.setItem(
+        PAYSTACK_SESSION_KEYS.applyDraft,
+        JSON.stringify({ form, portraitStoragePath: portraitPath, step: 4 }),
+      );
+
+      await startPaystackRedirectCheckout({
+        purpose: 'community_application',
+        email: sessionEmail,
+        callbackPath: '/apply/form',
+      });
+    } finally {
+      setPayingPaystack(false);
+    }
+  }
+
+  async function onSubmit(e: FormEvent) {
+    e.preventDefault();
+    const err = validateStep(4, form, portrait, portraitStoragePath, paymentReference);
+    if (err) {
+      toast.error(err);
+      return;
+    }
+    if (!paymentReference) {
+      toast.error('Pay the application fee with Paystack before submitting.');
       return;
     }
 
@@ -327,32 +430,8 @@ export function CommunityApplicationWizard() {
         return;
       }
 
-      const MAX_BYTES = 10 * 1024 * 1024;
-      if (portrait.size > MAX_BYTES || receipt.size > MAX_BYTES) {
-        toast.error('Each file must be 10 MB or smaller.');
-        return;
-      }
-
-      const pExt = extFromFile(portrait);
-      const rExt = extFromFile(receipt);
-      const portraitPath = `${user.id}/portrait-${Date.now()}.${pExt}`;
-      const receiptPath = `${user.id}/receipt-${Date.now()}.${rExt}`;
-
-      const { error: upP } = await supabase.storage
-        .from(BUCKET)
-        .upload(portraitPath, portrait, { upsert: false });
-      if (upP) {
-        toast.error(upP.message || 'Could not upload your portrait.');
-        return;
-      }
-
-      const { error: upR } = await supabase.storage
-        .from(BUCKET)
-        .upload(receiptPath, receipt, { upsert: false });
-      if (upR) {
-        toast.error(upR.message || 'Could not upload your receipt.');
-        return;
-      }
+      const portraitPath = await ensurePortraitUploaded(user.id);
+      if (!portraitPath) return;
 
       const payload = {
         firstName: form.firstName.trim(),
@@ -371,7 +450,7 @@ export function CommunityApplicationWizard() {
         commitmentScale: form.commitmentScale,
         readingGoals12m: form.readingGoals12m.trim(),
         portraitStoragePath: portraitPath,
-        receiptStoragePath: receiptPath,
+        paymentReference,
         referralSource: form.referralSource,
         referralOther: form.referralOther.trim() || null,
       };
@@ -397,6 +476,8 @@ export function CommunityApplicationWizard() {
         return;
       }
 
+      sessionStorage.removeItem(PAYSTACK_SESSION_KEYS.applyDraft);
+      sessionStorage.removeItem(PAYSTACK_SESSION_KEYS.applyPaymentRef);
       router.replace('/apply/thank-you');
     } catch (err) {
       const msg = err instanceof Error ? err.message : '';
@@ -1142,61 +1223,15 @@ export function CommunityApplicationWizard() {
 
           {step === 4 ? (
             <section className={cardShell}>
-              <div className="rounded-xl border border-[#E85D04]/25 bg-white px-4 py-3 font-poppins text-sm leading-relaxed text-[#7c2d12]">
-                Pay <strong>₦3,000</strong> only, then upload the receipt below. Use your
-                full name in the transfer narration so we can match payment to you.
-              </div>
-              <ul
-                className="mt-6 space-y-2.5 rounded-2xl border-2 border-[#005D51]/35 bg-[#F0FFFD] p-5 sm:space-y-3 sm:p-6 font-poppins text-sm text-[#142218]"
-                aria-label="Bank account for application fee"
-              >
-                <li>
-                  <span className="text-[#4a5c50]">Bank · </span>
-                  <strong>Zenith Bank</strong>
-                </li>
-                <li>
-                  <span className="text-[#4a5c50]">Account name · </span>
-                  <strong>Emprinte Readers Hub</strong>
-                </li>
-                <li>
-                  <span className="text-[#4a5c50]">Account number · </span>
-                  <strong className="font-mono tracking-wide">1228370098</strong>
-                </li>
-                <li className="pt-1 text-xs leading-relaxed text-[#4a5c50]">
-                  Narration example:{' '}
-                  <em>Application fee — [Your full name]</em>
-                </li>
-              </ul>
-              <div className="mt-6">
-                <p className={labelClass}>Payment receipt</p>
-                <p className="mt-1 font-poppins text-xs text-[#7B7B7B]">
-                  Screenshot or PDF from your bank app. Max 10 MB.
-                </p>
-                <label
-                  htmlFor="receipt"
-                  className="mt-3 flex min-h-[120px] cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[#142218]/15 bg-white px-4 py-6 text-center outline-none transition hover:border-[#005D51]/40 focus-within:border-[#005D51]/40 focus-within:outline-none focus-visible:ring-2 focus-visible:ring-[#005D51]/30 focus-visible:ring-offset-2 active:border-[#005D51]/35"
-                >
-                  <span className="font-poppins text-sm font-semibold text-[#005D51]">
-                    {receipt ? 'Replace receipt' : 'Upload receipt'}
-                  </span>
-                  {receipt ? (
-                    <span className="mt-2 truncate font-poppins text-xs text-[#4a5c50]">
-                      {receipt.name}
-                    </span>
-                  ) : (
-                    <span className="mt-2 font-poppins text-xs text-[#7B7B7B]">
-                      PDF, image, or Word
-                    </span>
-                  )}
-                  <input
-                    id="receipt"
-                    type="file"
-                    accept="image/*,.pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                    className="sr-only focus:outline-none focus-visible:outline-none"
-                    onChange={(e) => setReceipt(e.target.files?.[0] ?? null)}
-                  />
-                </label>
-              </div>
+              <PaystackPaymentPanel
+                feeLabel={APPLICATION_FEE_NAIRA.toLocaleString('en-NG')}
+                lead={PAYSTACK_CHECKOUT_COPY.applicationFeeLead}
+                payCta={PAYSTACK_CHECKOUT_COPY.applicationPayCta}
+                paymentReference={paymentReference}
+                verifying={verifyingReturn}
+                paying={payingPaystack}
+                onPay={() => void onPayApplicationFee()}
+              />
             </section>
           ) : null}
 
@@ -1231,11 +1266,20 @@ export function CommunityApplicationWizard() {
             >
               Continue
             </button>
+          ) : step === 4 && !paymentReference ? (
+            <button
+              type="button"
+              onClick={() => void onPayApplicationFee()}
+              disabled={busy || payingPaystack || verifyingReturn}
+              className="min-h-[48px] flex-1 rounded-xl bg-[#005D51] px-6 font-poppins text-sm font-semibold text-white outline-none transition hover:bg-[#004438] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#005D51]/50 focus-visible:ring-offset-2 disabled:opacity-55 sm:max-w-[260px] sm:flex-none"
+            >
+              {payingPaystack ? 'Opening Paystack…' : PAYSTACK_CHECKOUT_COPY.applicationPayCta}
+            </button>
           ) : (
             <button
               type="submit"
               form="apply-wizard-form"
-              disabled={busy}
+              disabled={busy || (step === 4 && !paymentReference)}
               className="min-h-[48px] flex-1 rounded-xl bg-[#005D51] px-6 font-poppins text-sm font-semibold text-white outline-none transition hover:bg-[#004438] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#005D51]/50 focus-visible:ring-offset-2 disabled:opacity-55 sm:max-w-[260px] sm:flex-none"
             >
               {busy ? 'Sending…' : 'Submit application'}

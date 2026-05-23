@@ -4,18 +4,20 @@ import { useRouter } from 'next/navigation';
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
+import { PaystackPaymentPanel } from '@/components/payments/PaystackPaymentPanel';
+import { PAYSTACK_CHECKOUT_COPY } from '@/constants/paystack-checkout';
 import {
   FINANCIAL_CATEGORY_OPTIONS,
-  WORKSHOP_BANK_DETAILS,
   WORKSHOP_PAYMENT_COPY,
   WORKSHOP_STEP_ABOUT,
   WORKSHOP_STEP_MONEY,
   WORKSHOP_STEP_PAYMENT,
   formatFeeNaira,
-  paymentFeeLine,
 } from '@/constants/workshop-registration';
 import { getSameOriginApiUrl } from '@/lib/api';
 import type { WorkshopPublic } from '@/lib/landing-workshops-db';
+import { PAYSTACK_SESSION_KEYS } from '@/lib/paystack/constants';
+import { startPaystackRedirectCheckout, usePaystackReturn } from '@/lib/paystack/client';
 import type { FinancialCategory } from '@/lib/validation/workshop-registration';
 import { workshopRegistrationSchema } from '@/lib/validation/workshop-registration';
 
@@ -74,19 +76,11 @@ function financeCardClass(active: boolean) {
   ].join(' ');
 }
 
-function extFromFile(file: File): string {
-  const n = file.name;
-  const i = n.lastIndexOf('.');
-  if (i === -1) return 'bin';
-  return n.slice(i + 1).toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin';
-}
-
 function validateStep(
   step: number,
   form: WorkshopFormState,
-  receipt: File | null,
+  paymentReference: string | null,
   needsPayment: boolean,
-  feeLabel: string,
 ): string | null {
   if (step === 0) {
     if (!form.fullName.trim()) return 'Add your full name to continue.';
@@ -109,7 +103,7 @@ function validateStep(
     return null;
   }
   if (needsPayment && step === 2) {
-    if (!receipt) return `Upload your ₦${feeLabel} workshop fee receipt to continue.`;
+    if (!paymentReference) return 'Pay the workshop fee with Paystack before submitting.';
     return null;
   }
   return null;
@@ -118,7 +112,7 @@ function validateStep(
 function toPayload(
   workshopId: string,
   form: WorkshopFormState,
-  receiptStoragePath: string | null,
+  paymentReference: string | null,
 ) {
   return {
     workshopId,
@@ -129,7 +123,7 @@ function toPayload(
     financialCategory: form.financialCategory as FinancialCategory,
     financeChallenges: form.financeChallenges.trim(),
     workshopQuestions: form.workshopQuestions.trim(),
-    receiptStoragePath: form.isMember === 'no' ? receiptStoragePath : null,
+    paymentReference: form.isMember === 'no' ? paymentReference : null,
   };
 }
 
@@ -153,9 +147,18 @@ export function WorkshopRegistrationWizard({
   const feeLabel = formatFeeNaira(workshop.feeAmountNaira);
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<WorkshopFormState>(initialForm);
-  const [receipt, setReceipt] = useState<File | null>(null);
-  const [uploadId] = useState(() => crypto.randomUUID());
+  const [payingPaystack, setPayingPaystack] = useState(false);
   const [busy, setBusy] = useState(false);
+
+  const draftKey = PAYSTACK_SESSION_KEYS.workshopDraft(workshop.id);
+  const paymentRefKey = PAYSTACK_SESSION_KEYS.workshopPaymentRef(workshop.id);
+
+  const { paymentReference, verifyingReturn } = usePaystackReturn({
+    purpose: 'workshop_registration',
+    workshopId: workshop.id,
+    email: form.email.trim() || undefined,
+    paymentRefStorageKey: paymentRefKey,
+  });
 
   const needsPayment = form.isMember === 'no';
 
@@ -177,13 +180,26 @@ export function WorkshopRegistrationWizard({
   }, [step, totalSteps]);
 
   useEffect(() => {
-    if (form.isMember === 'yes') {
-      setReceipt(null);
+    if (typeof window === 'undefined') return;
+    const raw = sessionStorage.getItem(draftKey);
+    if (!raw) return;
+    try {
+      const draft = JSON.parse(raw) as { form: WorkshopFormState; step: number };
+      setForm(draft.form);
+      setStep(draft.step);
+    } catch {
+      /* ignore */
     }
-  }, [form.isMember]);
+  }, [draftKey]);
+
+  useEffect(() => {
+    if (form.isMember === 'yes') {
+      sessionStorage.removeItem(paymentRefKey);
+    }
+  }, [form.isMember, paymentRefKey]);
 
   function nextStep() {
-    const err = validateStep(step, form, receipt, needsPayment, feeLabel);
+    const err = validateStep(step, form, paymentReference, needsPayment);
     if (err) {
       toast.error(err);
       return;
@@ -209,37 +225,38 @@ export function WorkshopRegistrationWizard({
     }
   }
 
-  async function uploadReceipt(): Promise<string | null> {
-    if (!receipt) return null;
-    const body = new FormData();
-    body.append('file', receipt);
-    body.append('uploadId', uploadId);
-    const res = await fetch(getSameOriginApiUrl('workshop-registration/receipt'), {
-      method: 'POST',
-      body,
-    });
-    const json = await res.json().catch(() => ({}));
-    if (!res.ok) {
-      toast.error(
-        typeof json.message === 'string'
-          ? json.message
-          : typeof json.error === 'string'
-            ? json.error
-            : 'Could not upload your receipt. Try again.',
+  async function onPayWorkshopFee() {
+    const err = validateStep(1, form, paymentReference, needsPayment);
+    if (err) {
+      toast.error(err);
+      return;
+    }
+    if (!form.email.trim()) {
+      toast.error('Add your email before paying.');
+      return;
+    }
+
+    setPayingPaystack(true);
+    try {
+      sessionStorage.setItem(
+        draftKey,
+        JSON.stringify({ form, step: needsPayment ? 2 : step }),
       );
-      return null;
+      const callbackPath = `/workshop/register?slug=${encodeURIComponent(workshop.slug)}`;
+      await startPaystackRedirectCheckout({
+        purpose: 'workshop_registration',
+        email: form.email.trim(),
+        callbackPath,
+        workshopId: workshop.id,
+      });
+    } finally {
+      setPayingPaystack(false);
     }
-    const path = json.receiptStoragePath;
-    if (typeof path !== 'string' || !path.trim()) {
-      toast.error('Upload succeeded but path was missing. Try again.');
-      return null;
-    }
-    return path.trim();
   }
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
-    const err = validateStep(step, form, receipt, needsPayment, feeLabel);
+    const err = validateStep(step, form, paymentReference, needsPayment);
     if (err) {
       toast.error(err);
       return;
@@ -247,13 +264,7 @@ export function WorkshopRegistrationWizard({
 
     setBusy(true);
     try {
-      let receiptStoragePath: string | null = null;
-      if (needsPayment) {
-        receiptStoragePath = await uploadReceipt();
-        if (!receiptStoragePath) return;
-      }
-
-      const payload = toPayload(workshop.id, form, receiptStoragePath);
+      const payload = toPayload(workshop.id, form, paymentReference);
       const parsed = workshopRegistrationSchema.safeParse(payload);
       if (!parsed.success) {
         toast.error('Please check your answers and try again.');
@@ -270,10 +281,14 @@ export function WorkshopRegistrationWizard({
         toast.error(
           typeof json.message === 'string'
             ? json.message
-            : 'Could not save your registration. Please try again.',
+            : typeof json.error === 'string'
+              ? json.error
+              : 'Could not save your registration. Please try again.',
         );
         return;
       }
+      sessionStorage.removeItem(draftKey);
+      sessionStorage.removeItem(paymentRefKey);
       router.replace(
         `/workshop/register/thank-you?slug=${encodeURIComponent(workshop.slug)}`,
       );
@@ -378,8 +393,7 @@ export function WorkshopRegistrationWizard({
               </p>
               {needsPayment ? (
                 <p className="mt-3 font-poppins text-xs font-medium text-[#E63715]">
-                  Not a Hub member yet? You will pay ₦{feeLabel} and upload a receipt in
-                  the final step.
+                  Not a Hub member yet? You will pay ₦{feeLabel} with Paystack in the final step.
                 </p>
               ) : null}
             </div>
@@ -531,76 +545,15 @@ export function WorkshopRegistrationWizard({
               </p>
             </div>
             <div className="flex flex-col gap-6 p-6 md:p-8">
-              <p className="font-poppins text-sm leading-relaxed text-[#142218]">
-                {paymentFeeLine(workshop)}
-                <span className="text-[#E63715]" aria-hidden>
-                  {' '}
-                  *
-                </span>
-              </p>
-              <p className="font-poppins text-sm italic text-[#4a5c50]">
-                {WORKSHOP_PAYMENT_COPY.receiptHint}
-              </p>
-
-              <div>
-                <p className="font-poppins text-sm font-medium text-[#142218]">
-                  Kindly make payment to:
-                </p>
-                <ul
-                  className="mt-4 space-y-2.5 rounded-2xl border-2 border-[#005D51]/35 bg-[#F0FFFD] p-5 font-poppins text-sm text-[#142218] sm:p-6"
-                  aria-label="Bank account for workshop fee"
-                >
-                  <li>
-                    <span className="text-[#4a5c50]">Bank · </span>
-                    <strong>{WORKSHOP_BANK_DETAILS.bank}</strong>
-                  </li>
-                  <li>
-                    <span className="text-[#4a5c50]">Account name · </span>
-                    <strong>{WORKSHOP_BANK_DETAILS.accountName}</strong>
-                  </li>
-                  <li>
-                    <span className="text-[#4a5c50]">Account number · </span>
-                    <strong className="font-mono tracking-wide">
-                      {WORKSHOP_BANK_DETAILS.accountNumber}
-                    </strong>
-                  </li>
-                  <li className="pt-1 text-xs leading-relaxed text-[#4a5c50]">
-                    Narration example:{' '}
-                    <em>Workshop fee — {form.fullName.trim() || 'Your full name'}</em>
-                  </li>
-                </ul>
-              </div>
-
-              <div>
-                <p className={labelClass}>Payment receipt</p>
-                <p className="mt-1 font-poppins text-xs text-[#7B7B7B]">
-                  {WORKSHOP_PAYMENT_COPY.uploadHelp}
-                </p>
-                <label
-                  htmlFor="workshop-receipt"
-                  className="mt-3 flex min-h-[120px] cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[#142218]/15 bg-white px-4 py-6 text-center outline-none transition hover:border-[#005D51]/40 focus-within:border-[#005D51]/40 focus-within:ring-2 focus-within:ring-[#005D51]/30 focus-within:ring-offset-2"
-                >
-                  <span className="font-poppins text-sm font-semibold text-[#005D51]">
-                    {receipt ? 'Replace receipt' : 'Add file'}
-                  </span>
-                  {receipt ? (
-                    <span className="mt-2 max-w-full truncate font-poppins text-xs text-[#4a5c50]">
-                      {receipt.name} ({extFromFile(receipt)})
-                    </span>
-                  ) : (
-                    <span className="mt-2 font-poppins text-xs text-[#7B7B7B]">
-                      PDF, image, or Word document
-                    </span>
-                  )}
-                  <input
-                    id="workshop-receipt"
-                    type="file"
-                    accept="image/*,.pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                    className="sr-only"
-                    onChange={(e) => setReceipt(e.target.files?.[0] ?? null)}
-                  />
-                </label>
-              </div>
+              <PaystackPaymentPanel
+                feeLabel={feeLabel}
+                lead={PAYSTACK_CHECKOUT_COPY.workshopFeeLead}
+                payCta={PAYSTACK_CHECKOUT_COPY.workshopPayCta(feeLabel)}
+                paymentReference={paymentReference}
+                verifying={verifyingReturn}
+                paying={payingPaystack}
+                onPay={() => void onPayWorkshopFee()}
+              />
             </div>
           </section>
         )}
@@ -635,11 +588,22 @@ export function WorkshopRegistrationWizard({
             >
               Continue
             </button>
+          ) : isLastStep && needsPayment && !paymentReference ? (
+            <button
+              type="button"
+              onClick={() => void onPayWorkshopFee()}
+              disabled={busy || payingPaystack || verifyingReturn}
+              className="min-h-[48px] flex-1 rounded-xl bg-[#005D51] px-6 font-poppins text-sm font-semibold text-white transition hover:bg-[#004438] disabled:opacity-55 sm:max-w-[260px] sm:flex-none"
+            >
+              {payingPaystack
+                ? 'Opening Paystack…'
+                : PAYSTACK_CHECKOUT_COPY.workshopPayCta(feeLabel)}
+            </button>
           ) : (
             <button
               type="submit"
               form="workshop-register-form"
-              disabled={busy}
+              disabled={busy || (needsPayment && isLastStep && !paymentReference)}
               className="min-h-[48px] flex-1 rounded-xl bg-[#005D51] px-6 font-poppins text-sm font-semibold text-white transition hover:bg-[#004438] disabled:opacity-55 sm:max-w-[260px] sm:flex-none"
             >
               {busy ? 'Saving…' : 'Complete registration'}
