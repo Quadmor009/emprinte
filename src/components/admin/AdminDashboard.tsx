@@ -4,7 +4,6 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 
-import { AdminPageSection } from '@/components/admin/AdminPageSection';
 import { AdminDashboardProps, DashboardTile, Snapshot } from '@/types';
 import { getSameOriginApiUrl } from '@/lib/api';
 
@@ -18,11 +17,26 @@ function StatSkeleton() {
   );
 }
 
-const tileAccent: Record<string, string> = {
-  blog: 'border-l-[#005D51] from-[#005D51]/[0.06] to-white',
-  buildAReader: 'border-l-[#e63715] from-[#e63715]/[0.07] to-white',
-  testimonials: 'border-l-[#6b5cff] from-[#6b5cff]/[0.06] to-white',
-  settings: 'border-l-[#0d8bd9] from-[#0d8bd9]/[0.06] to-white',
+const tileAccent: Record<string, { bar: string; bg: string; icon: string }> = {
+  blog: { bar: 'bg-[#005D51]', bg: 'bg-[#005D51]/[0.04]', icon: 'text-[#005D51]' },
+  buildAReader: { bar: 'bg-[#e63715]', bg: 'bg-[#e63715]/[0.04]', icon: 'text-[#e63715]' },
+  testimonials: { bar: 'bg-[#6b5cff]', bg: 'bg-[#6b5cff]/[0.04]', icon: 'text-[#6b5cff]' },
+  settings: { bar: 'bg-[#0d8bd9]', bg: 'bg-[#0d8bd9]/[0.04]', icon: 'text-[#0d8bd9]' },
+};
+
+const tileIcons: Record<string, ReactNode> = {
+  blog: (
+    <svg className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
+  ),
+  buildAReader: (
+    <svg className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.25-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" /></svg>
+  ),
+  testimonials: (
+    <svg className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" /></svg>
+  ),
+  settings: (
+    <svg className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+  ),
 };
 
 function MetricPill({
@@ -30,28 +44,30 @@ function MetricPill({
   value,
   sub,
   loading,
+  accent,
   footer,
 }: {
   label: string;
   value: string;
   sub?: string | null;
   loading: boolean;
+  accent?: string;
   footer?: ReactNode;
 }) {
   return (
-    <div className="flex min-h-full min-w-0 flex-col rounded-xl border border-[#142218]/08 bg-white px-4 py-3 shadow-[0_1px_2px_rgba(20,34,24,0.04)] sm:px-5 sm:py-3.5">
-      <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.14em] text-[#142218]/45">
+    <div className="group flex min-h-full min-w-0 flex-col rounded-2xl border border-[#142218]/06 bg-white px-5 py-4 shadow-[0_1px_3px_rgba(20,34,24,0.04)] transition hover:shadow-[0_4px_12px_rgba(20,34,24,0.06)]">
+      <p className={`font-poppins text-[11px] font-semibold uppercase tracking-[0.12em] ${accent ?? 'text-[#142218]/40'}`}>
         {label}
       </p>
       {loading ? (
-        <div className="mt-2 h-8 w-16 animate-pulse rounded-md bg-[#005D51]/10" />
+        <div className="mt-3 h-9 w-16 animate-pulse rounded-lg bg-[#005D51]/08" />
       ) : (
-        <p className="mt-1 truncate font-poppins text-xl font-bold tabular-nums tracking-tight text-[#142218] sm:text-2xl">
+        <p className="mt-1.5 truncate font-poppins text-[1.75rem] font-bold tabular-nums leading-tight tracking-tight text-[#142218]">
           {value}
         </p>
       )}
       {sub && !loading ? (
-        <p className="mt-0.5 truncate font-poppins text-xs font-medium text-[#5c6b5f]">{sub}</p>
+        <p className="mt-1 truncate font-poppins text-xs font-medium text-[#5c6b5f]/80">{sub}</p>
       ) : null}
       {footer ? <div className="mt-auto min-w-0 pt-3">{footer}</div> : null}
     </div>
@@ -194,32 +210,26 @@ export function AdminDashboard({ refreshKey, onManage }: AdminDashboardProps) {
       : null;
 
   return (
-    <div className="space-y-10 md:space-y-12">
-      <AdminPageSection
-        id="site-overview"
-        eyebrow="Site overview"
-        title="Manage what appears on your public site"
-        description={
-          <>
-            Control what visitors see on the public site: homepage sections, book drive,
-            quotes, and contact details. Editors below open in a panel except{' '}
-            <Link
-              href="/admin/blog"
-              className="font-medium text-[#005D51] underline decoration-[#005D51]/30 underline-offset-[3px] hover:text-[#004438] hover:decoration-[#005D51]"
-            >
-              Blog
-            </Link>
-            , which has its own tab. Newsletter signups and CSV export live under{' '}
-            <Link
-              href="/admin/newsletter"
-              className="font-medium text-[#005D51] underline decoration-[#005D51]/30 underline-offset-[3px] hover:text-[#004438] hover:decoration-[#005D51]"
-            >
-              Newsletter subscribers
-            </Link>
-            .
-          </>
-        }
-      />
+    <div className="space-y-8 md:space-y-10">
+      {/* Compact welcome header */}
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="font-lora text-2xl font-semibold tracking-tight text-[#142218] md:text-[1.75rem]">
+            Site overview
+          </h1>
+          <p className="mt-1.5 max-w-xl font-poppins text-sm leading-relaxed text-[#5c6b5f]">
+            Manage homepage sections, book drive, quotes, and contact details.
+          </p>
+        </div>
+        <Link
+          href="/"
+          target="_blank"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-[#005D51]/20 bg-white px-4 py-2.5 font-poppins text-sm font-medium text-[#005D51] transition hover:border-[#005D51]/40 hover:bg-[#005D51]/05"
+        >
+          <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
+          View live site
+        </Link>
+      </header>
 
       {snap.error ? (
         <div
@@ -240,6 +250,7 @@ export function AdminDashboard({ refreshKey, onManage }: AdminDashboardProps) {
         </div>
       ) : null}
 
+      {/* At-a-glance metrics */}
       <section aria-label="Key metrics" className="scroll-mt-4">
         <h2 className="sr-only">Key metrics</h2>
         <div className="grid min-w-0 grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
@@ -247,6 +258,7 @@ export function AdminDashboard({ refreshKey, onManage }: AdminDashboardProps) {
             label="Articles"
             value={snap.loading ? '—' : String(snap.insightCount)}
             sub="Live on /blog"
+            accent="text-[#005D51]"
             loading={snap.loading}
           />
           <MetricPill
@@ -257,11 +269,12 @@ export function AdminDashboard({ refreshKey, onManage }: AdminDashboardProps) {
                 : `${snap.booksCollected} / ${snap.totalBooks}`
             }
             sub={bookProgressPct != null ? `${bookProgressPct}% of goal` : null}
+            accent="text-[#e63715]"
             loading={snap.loading}
             footer={
               bookProgressPct != null && !snap.loading ? (
                 <div
-                  className="h-2 w-full overflow-hidden rounded-full bg-[#142218]/10"
+                  className="h-1.5 w-full overflow-hidden rounded-full bg-[#142218]/08"
                   role="progressbar"
                   aria-valuenow={bookProgressPct}
                   aria-valuemin={0}
@@ -269,7 +282,7 @@ export function AdminDashboard({ refreshKey, onManage }: AdminDashboardProps) {
                   aria-label="Progress toward book collection goal"
                 >
                   <div
-                    className="h-full rounded-full bg-[#005D51] transition-[width] duration-500"
+                    className="h-full rounded-full bg-[#e63715] transition-[width] duration-500"
                     style={{ width: `${bookProgressPct}%` }}
                   />
                 </div>
@@ -280,66 +293,82 @@ export function AdminDashboard({ refreshKey, onManage }: AdminDashboardProps) {
             label="Quotes"
             value={snap.loading ? '—' : String(snap.testimonialCount)}
             sub="Homepage carousel"
+            accent="text-[#6b5cff]"
             loading={snap.loading}
           />
           <Link
             href="/admin/newsletter"
-            className="flex min-h-full min-w-0 flex-col rounded-xl border border-[#005D51]/20 bg-linear-to-br from-[#005D51]/08 to-white px-4 py-3 text-left shadow-[0_1px_2px_rgba(20,34,24,0.04)] transition hover:border-[#005D51]/35 hover:shadow-[0_4px_20px_rgba(0,93,81,0.1)] sm:px-5 sm:py-3.5"
+            className="group flex min-h-full min-w-0 flex-col rounded-2xl border border-[#142218]/06 bg-white px-5 py-4 text-left shadow-[0_1px_3px_rgba(20,34,24,0.04)] transition hover:border-[#005D51]/25 hover:shadow-[0_4px_12px_rgba(0,93,81,0.08)]"
           >
-            <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.14em] text-[#005D51]">
+            <p className="font-poppins text-[11px] font-semibold uppercase tracking-[0.12em] text-[#0d8bd9]">
               Newsletter
             </p>
-            <p className="mt-1 font-poppins text-sm font-semibold text-[#142218]">View subscribers</p>
-            <p className="mt-0.5 font-poppins text-xs font-medium text-[#5c6b5f]">
-              Export CSV anytime
+            <p className="mt-1.5 font-poppins text-[1.75rem] font-bold leading-tight tracking-tight text-[#142218]">
+              View
+            </p>
+            <p className="mt-1 font-poppins text-xs font-medium text-[#5c6b5f]/80">
+              Subscribers &amp; CSV export
             </p>
           </Link>
         </div>
       </section>
 
+      {/* Content editors */}
       <section className="scroll-mt-4">
-        <h2 className="mb-4 font-poppins text-xs font-bold uppercase tracking-[0.14em] text-[#142218]/45">
+        <h2 className="mb-4 font-poppins text-xs font-bold uppercase tracking-[0.12em] text-[#142218]/40">
           Content editors
         </h2>
-        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-4 xl:gap-5">
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {tiles.map((t) => {
-            const accent = tileAccent[t.key] ?? 'border-l-[#005D51] from-[#005D51]/06 to-white';
+            const accent = tileAccent[t.key] ?? tileAccent.blog;
+            const icon = tileIcons[t.key];
+
             const tileClassName = [
-              'group relative flex min-h-[260px] w-full max-w-full flex-col overflow-hidden rounded-2xl border border-[#142218]/08 bg-linear-to-b text-left shadow-[0_2px_8px_rgba(20,34,24,0.04)] transition duration-200',
-              'border-l-[4px] hover:border-[#142218]/12 hover:shadow-[0_12px_40px_rgba(0,93,81,0.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#005D51]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#eef5f2]',
-              accent,
+              'group relative flex w-full max-w-full flex-col overflow-hidden rounded-2xl border border-[#142218]/06 bg-white text-left shadow-[0_1px_3px_rgba(20,34,24,0.04)] transition duration-200',
+              'hover:border-[#142218]/10 hover:shadow-[0_8px_30px_rgba(0,93,81,0.08)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#005D51]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#eef5f2]',
             ].join(' ');
 
             const body = (
               <>
-                <div className="flex flex-1 flex-col px-5 pb-5 pt-5 md:px-6 md:pt-6">
-                  <div className="min-h-0 flex-1">
-                    <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.14em] text-[#142218]/45">
-                      {t.statLabel}
-                    </p>
-                    <div className="mt-2 min-h-10">
-                      {snap.loading ? (
-                        <StatSkeleton />
-                      ) : (
-                        <>
-                          <p className="font-poppins text-2xl font-bold tabular-nums leading-tight tracking-tight text-[#142218] sm:text-[1.75rem] wrap-anywhere">
+                {/* Colored top bar */}
+                <div className={`h-1 w-full ${accent.bar}`} />
+                <div className="flex flex-1 flex-col px-5 pb-5 pt-4 md:px-6">
+                  {/* Icon + title row */}
+                  <div className="flex items-center gap-3">
+                    <div className={`flex size-9 shrink-0 items-center justify-center rounded-xl ${accent.bg} ${accent.icon}`}>
+                      {icon}
+                    </div>
+                    <h3 className="font-lora text-base font-semibold text-[#142218]">{t.title}</h3>
+                  </div>
+
+                  {/* Stat */}
+                  <div className="mt-4 min-h-10">
+                    {snap.loading ? (
+                      <StatSkeleton />
+                    ) : (
+                      <>
+                        <div className="flex items-baseline gap-2">
+                          <p className="font-poppins text-2xl font-bold tabular-nums leading-tight tracking-tight text-[#142218] wrap-anywhere">
                             {t.highlight}
                           </p>
                           {t.detail ? (
-                            <p className="mt-1.5 font-poppins text-sm font-medium leading-snug text-[#5c6b5f]">
+                            <p className="font-poppins text-xs font-medium text-[#5c6b5f]/80">
                               {t.detail}
                             </p>
                           ) : null}
-                        </>
-                      )}
-                    </div>
-                    <h3 className="mt-5 font-lora text-lg font-semibold text-[#142218]">{t.title}</h3>
-                    <p className="mt-1.5 font-poppins text-sm leading-relaxed text-[#7B7B7B]">{t.blurb}</p>
+                        </div>
+                      </>
+                    )}
                   </div>
-                  <span className="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-[#005D51] px-4 py-3 font-poppins text-sm font-semibold text-white transition group-hover:bg-[#004438] sm:py-3.5">
+
+                  {/* Description */}
+                  <p className="mt-2 font-poppins text-[13px] leading-relaxed text-[#7B7B7B]">{t.blurb}</p>
+
+                  {/* CTA */}
+                  <span className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-[#005D51] px-4 py-2.5 font-poppins text-sm font-semibold text-white transition group-hover:bg-[#004438]">
                     {'href' in t ? 'Open blog' : 'Open editor'}
                     <span className="ml-1.5 transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden>
-                      →
+                      &rarr;
                     </span>
                   </span>
                 </div>
@@ -368,56 +397,34 @@ export function AdminDashboard({ refreshKey, onManage }: AdminDashboardProps) {
         </ul>
       </section>
 
-      <section
-        aria-labelledby="quick-actions-heading"
-        className="rounded-2xl border border-[#142218]/08 bg-white p-5 shadow-[0_2px_12px_rgba(20,34,24,0.04)] sm:p-6 md:p-8"
-      >
-        <h2
-          id="quick-actions-heading"
-          className="font-lora text-lg font-semibold text-[#142218] sm:text-xl"
-        >
-          Quick actions
-        </h2>
-        <p className="mt-1 max-w-2xl font-poppins text-sm leading-relaxed text-[#5c6b5f]">
-          Same destinations as the sidebar—use this row when you already know where
-          you&apos;re headed.
-        </p>
-        <ul className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {(
-            [
-              { href: '/admin/newsletter', label: 'Newsletter list', hint: 'Subscribers & export' },
-              {
-                href: '/admin/community-applications',
-                label: 'Membership applications',
-                hint: 'Review requests',
-              },
-              { href: '/admin/invite', label: 'Send invite', hint: 'New admin access' },
-              { href: '/admin/blog', label: 'Write on blog', hint: 'Articles & drafts' },
-            ] as const
-          ).map((item) => (
-            <li key={item.href}>
-              <Link
-                href={item.href}
-                className="flex h-full min-h-18 flex-col justify-center rounded-xl border border-[#142218]/08 bg-[#fafcfb] px-4 py-3 transition hover:border-[#005D51]/25 hover:bg-white hover:shadow-[0_4px_16px_rgba(0,93,81,0.08)]"
-              >
-                <span className="font-poppins text-sm font-semibold text-[#142218]">{item.label}</span>
-                <span className="mt-0.5 font-poppins text-xs font-medium text-[#5c6b5f]">{item.hint}</span>
-              </Link>
-            </li>
+      {/* Getting started — compact checklist */}
+      <section className="rounded-2xl border border-[#005D51]/10 bg-white px-5 py-5 shadow-[0_1px_3px_rgba(20,34,24,0.04)] sm:px-6 sm:py-6">
+        <div className="flex items-center gap-2.5">
+          <div className="flex size-8 items-center justify-center rounded-lg bg-[#005D51]/08">
+            <svg className="size-4 text-[#005D51]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5.002 5.002 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+          </div>
+          <h2 className="font-poppins text-sm font-semibold text-[#142218]">
+            Getting started
+          </h2>
+        </div>
+        <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            'Set contact email & social links in Site details',
+            'Add at least one homepage quote',
+            'Publish your first blog post',
+            'Check Newsletter after campaigns go live',
+          ].map((step, i) => (
+            <div
+              key={i}
+              className="flex items-start gap-2.5 rounded-xl bg-[#f7faf8] px-3.5 py-3"
+            >
+              <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-[#005D51]/10 font-poppins text-[11px] font-bold text-[#005D51]">
+                {i + 1}
+              </span>
+              <p className="font-poppins text-[13px] leading-snug text-[#4a5c50]">{step}</p>
+            </div>
           ))}
-        </ul>
-      </section>
-
-      <section className="rounded-2xl border border-dashed border-[#005D51]/25 bg-[#005D51]/3 px-5 py-5 sm:px-6 sm:py-6">
-        <h2 className="font-lora text-base font-semibold text-[#142218] sm:text-lg">
-          Getting started
-        </h2>
-        <ol className="mt-3 list-decimal space-y-2 pl-5 font-poppins text-sm leading-relaxed text-[#4a5c50] marker:font-semibold marker:text-[#005D51]">
-          <li>Set your primary contact email and social links under Site details.</li>
-          <li>Add at least one homepage quote in Testimonials.</li>
-          <li>Publish your first blog post when you are ready.</li>
-          <li>Check Newsletter subscribers after campaigns go live.</li>
-        </ol>
+        </div>
       </section>
     </div>
   );
