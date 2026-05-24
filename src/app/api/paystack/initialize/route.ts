@@ -30,6 +30,7 @@ const bodySchema = z.object({
   amountNaira: z.number().int().positive().optional(),
   fullName: z.string().trim().min(1).max(200).optional(),
   message: z.string().trim().max(2000).optional(),
+  anonymous: z.boolean().optional(),
 });
 
 export async function POST(request: Request) {
@@ -58,7 +59,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const { purpose, email, callbackPath, workshopId, amountNaira, fullName, message } =
+  const { purpose, email, callbackPath, workshopId, amountNaira, fullName, message, anonymous } =
     parsed.data;
   const origin = resolveSiteOrigin(request);
   const callbackUrl = `${origin}${callbackPath.startsWith('/') ? callbackPath : `/${callbackPath}`}`;
@@ -118,6 +119,7 @@ export async function POST(request: Request) {
       full_name: fullName.trim(),
       amount_naira: amountNaira,
       ...(message?.trim() ? { message: message.trim() } : {}),
+      ...(anonymous ? { anonymous: true } : {}),
     };
   } else {
     if (!workshopId) {

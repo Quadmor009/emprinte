@@ -76,7 +76,8 @@ export async function completeDonationFromReference(
     return { ok: false, error: amountError };
   }
 
-  const fullName = metadataString(tx.metadata, 'full_name');
+  const anonymous = tx.metadata.anonymous === true || tx.metadata.anonymous === 'true';
+  const fullName = metadataString(tx.metadata, 'full_name') ?? (anonymous ? 'Anonymous Donor' : null);
   const email =
     metadataString(tx.metadata, 'email') ??
     tx.customerEmail?.trim() ??
@@ -104,6 +105,7 @@ export async function completeDonationFromReference(
     amountKobo: tx.amount,
     booksCredited: booksToCredit,
     paymentReference: tx.reference,
+    anonymous,
   });
 
   if (!donation) {

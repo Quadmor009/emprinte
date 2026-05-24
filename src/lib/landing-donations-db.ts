@@ -9,6 +9,7 @@ export type DonationRow = {
   books_credited: number;
   payment_reference: string;
   submitted_at: string;
+  anonymous: boolean;
 };
 
 export async function fetchDonationByReference(
@@ -38,6 +39,7 @@ export async function insertDonationRow(row: {
   amountKobo: number;
   booksCredited: number;
   paymentReference: string;
+  anonymous?: boolean;
 }): Promise<DonationRow | null> {
   const sb = createSupabaseServiceRoleClient();
   if (!sb) return null;
@@ -52,6 +54,7 @@ export async function insertDonationRow(row: {
       amount_kobo: row.amountKobo,
       books_credited: row.booksCredited,
       payment_reference: row.paymentReference.trim(),
+      anonymous: row.anonymous ?? false,
     })
     .select('*')
     .single<DonationRow>();

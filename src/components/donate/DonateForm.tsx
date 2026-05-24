@@ -25,6 +25,7 @@ export function DonateForm({ pricePerBook }: DonateFormProps) {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
+  const [anonymous, setAnonymous] = useState(false);
   const [selectedPreset, setSelectedPreset] = useState<number | null>(
     DONATION_PRESET_NAIRA[0] ?? null,
   );
@@ -54,10 +55,11 @@ export function DonateForm({ pricePerBook }: DonateFormProps) {
     }
 
     const parsed = donationFormSchema.safeParse({
-      fullName,
+      fullName: anonymous ? 'Anonymous Donor' : fullName,
       email,
       message,
       amountNaira,
+      anonymous,
     });
     if (!parsed.success) {
       const first = parsed.error.issues[0]?.message ?? 'Check the form and try again.';
@@ -68,10 +70,11 @@ export function DonateForm({ pricePerBook }: DonateFormProps) {
     setPaying(true);
     try {
       await startDonationCheckout({
-        fullName: parsed.data.fullName,
+        fullName: parsed.data.fullName ?? 'Anonymous Donor',
         email: parsed.data.email,
         message: parsed.data.message,
         amountNaira: parsed.data.amountNaira,
+        anonymous: parsed.data.anonymous,
       });
     } finally {
       setPaying(false);
@@ -135,18 +138,32 @@ export function DonateForm({ pricePerBook }: DonateFormProps) {
       </div>
 
       <div className="grid gap-4">
-        <label className="flex flex-col gap-1.5">
-          <span className="font-poppins text-sm font-medium text-[#142218]">
-            {DONATE_PAGE_COPY.nameLabel}
-          </span>
+        <label className="flex cursor-pointer items-center gap-2.5 rounded-xl border border-[#142218]/08 bg-[#f8fcfb] px-4 py-3 transition hover:border-[#005D51]/25">
           <input
-            type="text"
-            autoComplete="name"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            className="min-h-[48px] rounded-xl border border-[#142218]/12 px-4 font-poppins text-sm text-[#142218] outline-none focus:border-[#005D51]/45"
+            type="checkbox"
+            checked={anonymous}
+            onChange={(e) => setAnonymous(e.target.checked)}
+            className="size-4 accent-[#005D51]"
           />
+          <span className="font-poppins text-sm font-medium text-[#142218]">
+            Donate anonymously
+          </span>
         </label>
+
+        {!anonymous ? (
+          <label className="flex flex-col gap-1.5">
+            <span className="font-poppins text-sm font-medium text-[#142218]">
+              {DONATE_PAGE_COPY.nameLabel}
+            </span>
+            <input
+              type="text"
+              autoComplete="name"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              className="min-h-[48px] rounded-xl border border-[#142218]/12 px-4 font-poppins text-sm text-[#142218] outline-none focus:border-[#005D51]/45"
+            />
+          </label>
+        ) : null}
         <label className="flex flex-col gap-1.5">
           <span className="font-poppins text-sm font-medium text-[#142218]">
             {DONATE_PAGE_COPY.emailLabel}

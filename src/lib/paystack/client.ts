@@ -115,6 +115,7 @@ export async function startDonationCheckout(args: {
   email: string;
   message?: string;
   amountNaira: number;
+  anonymous?: boolean;
 }): Promise<boolean> {
   const res = await fetch(getSameOriginApiUrl('paystack/initialize'), {
     method: 'POST',
@@ -122,9 +123,10 @@ export async function startDonationCheckout(args: {
     body: JSON.stringify({
       purpose: 'build_a_reader_donation',
       email: args.email.trim(),
-      fullName: args.fullName.trim(),
+      fullName: args.anonymous ? 'Anonymous Donor' : args.fullName.trim(),
       message: args.message?.trim() || undefined,
       amountNaira: args.amountNaira,
+      anonymous: args.anonymous || undefined,
       callbackPath: '/donate/thank-you',
     }),
   });

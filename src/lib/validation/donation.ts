@@ -4,15 +4,21 @@ import {
   DONATION_MAX_NAIRA,
 } from '@/lib/paystack/constants';
 
-export const donationFormSchema = z.object({
-  fullName: z.string().trim().min(1, 'Name is required.').max(200),
-  email: z.string().trim().email('Enter a valid email.'),
-  message: z.string().trim().max(2000).optional().or(z.literal('')),
-  amountNaira: z
-    .number({ error: 'Enter a donation amount.' })
-    .int('Amount must be a whole naira value.')
-    .positive('Amount must be greater than zero.'),
-});
+export const donationFormSchema = z
+  .object({
+    fullName: z.string().trim().max(200).optional().or(z.literal('')),
+    email: z.string().trim().email('Enter a valid email.'),
+    message: z.string().trim().max(2000).optional().or(z.literal('')),
+    anonymous: z.boolean().optional(),
+    amountNaira: z
+      .number({ error: 'Enter a donation amount.' })
+      .int('Amount must be a whole naira value.')
+      .positive('Amount must be greater than zero.'),
+  })
+  .refine((d) => d.anonymous || (d.fullName && d.fullName.length >= 1), {
+    message: 'Name is required unless donating anonymously.',
+    path: ['fullName'],
+  });
 
 export type DonationFormValues = z.infer<typeof donationFormSchema>;
 
