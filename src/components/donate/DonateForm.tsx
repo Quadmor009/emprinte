@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -194,12 +193,6 @@ export function DonateForm({ pricePerBook }: DonateFormProps) {
         {paying ? DONATE_PAGE_COPY.openingPaystack : DONATE_PAGE_COPY.payCta(displayAmount)}
       </button>
 
-      <p className="text-center font-poppins text-xs text-[#4a5c50]">
-        Questions?{' '}
-        <Link href={`mailto:${DONATE_PAGE_COPY.supportEmail}`} className="text-[#005D51] underline">
-          {DONATE_PAGE_COPY.supportEmail}
-        </Link>
-      </p>
     </div>
   );
 }
