@@ -41,3 +41,15 @@ export interface WorkshopRegistrationRow {
   payment_reference: string | null;
   submitted_at: string;
 }
+
+/** `landing.donations` — verified #BuildAReader Paystack gifts. */
+export interface DonationRow {
+  id: string;
+  full_name: string;
+  email: string;
+  message: string | null;
+  amount_kobo: number;
+  books_credited: number;
+  payment_reference: string;
+  submitted_at: string;
+}

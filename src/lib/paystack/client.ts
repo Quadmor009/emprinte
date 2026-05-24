@@ -110,6 +110,47 @@ export function usePaystackReturn({
   };
 }
 
+export async function startDonationCheckout(args: {
+  fullName: string;
+  email: string;
+  message?: string;
+  amountNaira: number;
+}): Promise<boolean> {
+  const res = await fetch(getSameOriginApiUrl('paystack/initialize'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      purpose: 'build_a_reader_donation',
+      email: args.email.trim(),
+      fullName: args.fullName.trim(),
+      message: args.message?.trim() || undefined,
+      amountNaira: args.amountNaira,
+      callbackPath: '/donate/thank-you',
+    }),
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const detail =
+      typeof data.message === 'string' && data.message
+        ? data.message
+        : typeof data.error === 'string'
+          ? data.error
+          : 'Could not open Paystack checkout.';
+    toast.error(detail);
+    return false;
+  }
+
+  const url = typeof data.authorizationUrl === 'string' ? data.authorizationUrl : '';
+  if (!url) {
+    toast.error('Paystack did not return a checkout link.');
+    return false;
+  }
+
+  window.location.assign(url);
+  return true;
+}
+
 export async function startPaystackRedirectCheckout(args: {
   purpose: PaystackPurpose;
   email: string;

@@ -1,6 +1,6 @@
 import { createSupabaseServiceRoleClient } from '@/lib/supabase/db';
 import { type PaystackPurpose } from '@/lib/paystack/constants';
-import { verifyPaystackReference } from '@/lib/paystack/server';
+import { type PaystackVerifyData, verifyPaystackReference } from '@/lib/paystack/server';
 
 export type AssertPaymentArgs = {
   reference: string;
@@ -9,10 +9,14 @@ export type AssertPaymentArgs = {
   expectedEmail?: string;
   expectedUserId?: string;
   expectedWorkshopId?: string;
+  /** Donations validate amount separately against campaign min/max. */
+  skipAmountCheck?: boolean;
+  /** Allow re-reading a reference already stored for this flow (donation idempotency). */
+  skipConsumedCheck?: boolean;
 };
 
 export type AssertPaymentResult =
-  | { ok: true; reference: string }
+  | { ok: true; reference: string; transaction: PaystackVerifyData }
   | { ok: false; error: string };
 
 function metadataString(meta: Record<string, unknown>, key: string): string | null {
@@ -30,7 +34,7 @@ export async function isPaymentReferenceConsumed(reference: string): Promise<boo
   }
 
   const ref = reference.trim();
-  const [{ data: apps }, { data: workshops }] = await Promise.all([
+  const [{ data: apps }, { data: workshops }, { data: donations }] = await Promise.all([
     admin
       .schema('landing')
       .from('community_applications')
@@ -43,9 +47,19 @@ export async function isPaymentReferenceConsumed(reference: string): Promise<boo
       .select('id')
       .eq('payment_reference', ref)
       .limit(1),
+    admin
+      .schema('landing')
+      .from('donations')
+      .select('id')
+      .eq('payment_reference', ref)
+      .limit(1),
   ]);
 
-  return Boolean((apps && apps.length > 0) || (workshops && workshops.length > 0));
+  return Boolean(
+    (apps && apps.length > 0) ||
+      (workshops && workshops.length > 0) ||
+      (donations && donations.length > 0),
+  );
 }
 
 export async function assertPaystackPayment(
@@ -56,7 +70,7 @@ export async function assertPaystackPayment(
     return { ok: false, error: 'Payment reference is required.' };
   }
 
-  if (await isPaymentReferenceConsumed(reference)) {
+  if (!args.skipConsumedCheck && (await isPaymentReferenceConsumed(reference))) {
     return { ok: false, error: 'This payment has already been used.' };
   }
 
@@ -69,7 +83,11 @@ export async function assertPaystackPayment(
     return { ok: false, error: 'Payment was not completed. Please pay before submitting.' };
   }
 
-  if (tx.currency !== 'NGN' || tx.amount !== args.expectedAmountKobo) {
+  if (tx.currency !== 'NGN') {
+    return { ok: false, error: 'Payment currency is not supported.' };
+  }
+
+  if (!args.skipAmountCheck && tx.amount !== args.expectedAmountKobo) {
     return { ok: false, error: 'Payment amount does not match the expected fee.' };
   }
 
@@ -102,5 +120,5 @@ export async function assertPaystackPayment(
     }
   }
 
-  return { ok: true, reference: tx.reference };
+  return { ok: true, reference: tx.reference, transaction: tx };
 }

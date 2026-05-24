@@ -95,12 +95,12 @@ export function BookClub() {
             </div>
 
             <div className="flex w-full max-w-full flex-col gap-4 sm:flex-row sm:items-center">
-              <button
-                type="button"
-                className="h-10 w-full rounded-xl bg-[#E63715] font-medium text-white xl:h-16 xl:text-2xl"
+              <Link
+                href="/donate"
+                className="flex h-10 w-full items-center justify-center rounded-xl bg-[#E63715] font-medium text-white xl:h-16 xl:text-2xl"
               >
                 Donate Now
-              </button>
+              </Link>
               <Link
                 href="/build-a-reader"
                 className="flex h-10 w-full items-center justify-center rounded-xl border border-white bg-transparent font-medium text-white xl:h-16 xl:text-2xl"

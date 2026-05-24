@@ -11,6 +11,7 @@ import {
   HiOutlineSquares2X2,
   HiOutlineUserCircle,
   HiOutlineUserPlus,
+  HiOutlineHeart,
   HiOutlineAcademicCap,
   HiXMark,
 } from 'react-icons/hi2';
@@ -49,6 +50,7 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
   const applicationsActive = pathname === '/admin/community-applications';
   const workshopRegistrationsActive = pathname === '/admin/workshop-registrations';
   const bootcampRegistrationsActive = pathname === '/admin/bootcamp-registrations';
+  const donationsActive = pathname === '/admin/donations';
   const profileActive = pathname === '/admin/profile';
   const inviteActive = pathname === '/admin/invite';
 
@@ -125,6 +127,17 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
             aria-hidden
           />
           <span>Bootcamp registrations</span>
+        </Link>
+        <Link
+          href="/admin/donations"
+          onClick={onNavigate}
+          className={navLinkClass(donationsActive)}
+        >
+          <HiOutlineHeart
+            className={`${navIconClass} ${donationsActive ? navIconActive : ''}`}
+            aria-hidden
+          />
+          <span>Donations</span>
         </Link>
         <Link
           href="/admin/profile"

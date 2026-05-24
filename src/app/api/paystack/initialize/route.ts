@@ -1,8 +1,13 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
+import { fetchBuildAReaderRow } from '@/lib/landing-build-a-reader-db';
 import { fetchWorkshopById } from '@/lib/landing-workshops-db';
-import { APPLICATION_FEE_KOBO, type PaystackPurpose } from '@/lib/paystack/constants';
+import {
+  APPLICATION_FEE_KOBO,
+  DONATION_MAX_NAIRA,
+  type PaystackPurpose,
+} from '@/lib/paystack/constants';
 import {
   amountKoboForPurpose,
   generatePaystackReference,
@@ -10,13 +15,21 @@ import {
   isPaystackConfigured,
   resolveSiteOrigin,
 } from '@/lib/paystack/server';
+import { validateDonationAmountNaira } from '@/lib/validation/donation';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 const bodySchema = z.object({
-  purpose: z.enum(['community_application', 'workshop_registration']),
+  purpose: z.enum([
+    'community_application',
+    'workshop_registration',
+    'build_a_reader_donation',
+  ]),
   email: z.string().trim().email(),
   callbackPath: z.string().trim().min(1).max(500),
   workshopId: z.string().uuid().optional(),
+  amountNaira: z.number().int().positive().optional(),
+  fullName: z.string().trim().min(1).max(200).optional(),
+  message: z.string().trim().max(2000).optional(),
 });
 
 export async function POST(request: Request) {
@@ -45,7 +58,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const { purpose, email, callbackPath, workshopId } = parsed.data;
+  const { purpose, email, callbackPath, workshopId, amountNaira, fullName, message } =
+    parsed.data;
   const origin = resolveSiteOrigin(request);
   const callbackUrl = `${origin}${callbackPath.startsWith('/') ? callbackPath : `/${callbackPath}`}`;
 
@@ -70,6 +84,41 @@ export async function POST(request: Request) {
     userId = user.id;
     amountKobo = APPLICATION_FEE_KOBO;
     metadata = { ...metadata, user_id: user.id };
+  } else if (purpose === 'build_a_reader_donation') {
+    if (!fullName?.trim()) {
+      return NextResponse.json({ error: 'Name is required for donations.' }, { status: 400 });
+    }
+    if (amountNaira == null) {
+      return NextResponse.json({ error: 'Donation amount is required.' }, { status: 400 });
+    }
+
+    const campaign = await fetchBuildAReaderRow();
+    const pricePerBook = campaign?.pricePerBook ?? 0;
+    if (pricePerBook <= 0) {
+      return NextResponse.json(
+        { error: 'Donations are not configured yet. Try again later.' },
+        { status: 503 },
+      );
+    }
+
+    const amountError = validateDonationAmountNaira(amountNaira, pricePerBook);
+    if (amountError) {
+      return NextResponse.json({ error: amountError }, { status: 400 });
+    }
+    if (amountNaira > DONATION_MAX_NAIRA) {
+      return NextResponse.json(
+        { error: `Maximum donation is ₦${DONATION_MAX_NAIRA.toLocaleString()}.` },
+        { status: 400 },
+      );
+    }
+
+    amountKobo = amountKoboForPurpose('build_a_reader_donation', null, amountNaira);
+    metadata = {
+      ...metadata,
+      full_name: fullName.trim(),
+      amount_naira: amountNaira,
+      ...(message?.trim() ? { message: message.trim() } : {}),
+    };
   } else {
     if (!workshopId) {
       return NextResponse.json({ error: 'workshopId is required for workshop payments.' }, { status: 400 });

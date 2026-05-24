@@ -42,16 +42,29 @@ export function resolveSiteOrigin(request: Request): string {
 }
 
 export function generatePaystackReference(purpose: PaystackPurpose): string {
-  const prefix = purpose === 'community_application' ? 'emp_app' : 'emp_wks';
+  const prefix =
+    purpose === 'community_application'
+      ? 'emp_app'
+      : purpose === 'workshop_registration'
+        ? 'emp_wks'
+        : 'emp_don';
   return `${prefix}_${randomUUID().replace(/-/g, '').slice(0, 20)}`;
 }
 
 export function amountKoboForPurpose(
   purpose: PaystackPurpose,
   workshopFeeNaira: number | null | undefined,
+  donationNaira?: number,
 ): number {
   if (purpose === 'community_application') {
     return APPLICATION_FEE_KOBO;
+  }
+  if (purpose === 'build_a_reader_donation') {
+    const naira = donationNaira ?? 0;
+    if (!Number.isFinite(naira) || naira <= 0) {
+      throw new Error('Donation amount is not valid.');
+    }
+    return Math.round(naira * 100);
   }
   const naira = workshopFeeNaira ?? 5000;
   if (!Number.isFinite(naira) || naira <= 0) {
