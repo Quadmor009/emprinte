@@ -4,7 +4,6 @@ import { notFound } from 'next/navigation';
 import { Header } from '@/components/sections/Header';
 import { Footer } from '@/components/sections/Footer';
 import { BlogPostView } from '@/components/sections/BlogPostView';
-import { insightArticles } from '@/constants/data';
 import { fetchInsightArticleBySlugParam } from '@/lib/insights-public';
 import { articlePublicPath } from '@/lib/insight-slug';
 import { getPublicSiteOrigin } from '@/lib/public-site-url';
@@ -15,13 +14,7 @@ type PageProps = {
 };
 
 async function resolveArticle(slugParam: string) {
-  const fromApi = await fetchInsightArticleBySlugParam(slugParam);
-  if (fromApi) return fromApi;
-  return (
-    insightArticles.find(
-      (a) => articlePublicPath(a) === slugParam || a.id === slugParam,
-    ) ?? null
-  );
+  return fetchInsightArticleBySlugParam(slugParam);
 }
 
 export async function generateMetadata({

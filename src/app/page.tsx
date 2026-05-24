@@ -9,14 +9,13 @@ import { Stats } from '@/components/sections/Stats';
 import { ExclusiveWorkshop } from '@/components/sections/ExclusiveWorkshop';
 import { Hero } from '@/components/sections/Hero';
 import { Insights } from '@/components/sections/Insights';
-import { insightArticles } from '@/constants/data';
 import { fetchInsightArticlesList } from '@/lib/insights-public';
 import { getSiteSettings } from '@/lib/site-settings-server';
 
 export default async function Home() {
   const settings = await getSiteSettings();
   const fetched = await fetchInsightArticlesList();
-  const landingInsights = (fetched?.length ? fetched : insightArticles).slice(0, 3);
+  const landingInsights = (fetched ?? []).slice(0, 3);
 
   return (
     <main className="relative flex min-h-screen flex-col items-center overflow-x-visible bg-white">
