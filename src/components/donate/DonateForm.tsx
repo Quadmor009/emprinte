@@ -83,10 +83,6 @@ export function DonateForm({ pricePerBook }: DonateFormProps) {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="rounded-xl border border-[#005D51]/15 bg-[#f8fcfb] px-4 py-3 font-poppins text-sm leading-relaxed text-[#4a5c50]">
-        {DONATE_PAGE_COPY.disclaimer}
-      </div>
-
       <div className="flex flex-col gap-3">
         <p className="font-poppins text-sm font-semibold text-[#142218]">
           {DONATE_PAGE_COPY.amountLabel}
@@ -94,7 +90,7 @@ export function DonateForm({ pricePerBook }: DonateFormProps) {
         <p className="font-poppins text-xs text-[#4a5c50]">
           Minimum {formatNaira(minNaira)} (one book). Maximum {formatNaira(DONATION_MAX_NAIRA)}.
         </p>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+        <div className="grid grid-cols-3 gap-2">
           {DONATION_PRESET_NAIRA.map((preset) => {
             const active = !customAmount.trim() && selectedPreset === preset;
             return (
