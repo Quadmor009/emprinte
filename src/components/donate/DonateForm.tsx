@@ -25,9 +25,7 @@ export function DonateForm({ pricePerBook }: DonateFormProps) {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [anonymous, setAnonymous] = useState(false);
-  const [selectedPreset, setSelectedPreset] = useState<number | null>(
-    DONATION_PRESET_NAIRA[0] ?? null,
-  );
+  const [selectedPreset, setSelectedPreset] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState('');
   const [paying, setPaying] = useState(false);
 
@@ -97,7 +95,7 @@ export function DonateForm({ pricePerBook }: DonateFormProps) {
                 key={preset}
                 type="button"
                 onClick={() => {
-                  setSelectedPreset(preset);
+                  setSelectedPreset(selectedPreset === preset ? null : preset);
                   setCustomAmount('');
                 }}
                 className={[
