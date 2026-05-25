@@ -14,8 +14,7 @@ import { getSiteSettings } from '@/lib/site-settings-server';
 
 export default async function Home() {
   const settings = await getSiteSettings();
-  const fetched = await fetchInsightArticlesList();
-  const landingInsights = (fetched ?? []).slice(0, 3);
+  const landingInsights = (await fetchInsightArticlesList()).slice(0, 3);
 
   return (
     <main className="relative flex min-h-screen flex-col items-center overflow-x-visible bg-white">
