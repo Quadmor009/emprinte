@@ -6,7 +6,7 @@ import { isProbablyRichHtml, sanitizeArticleHtml } from '@/lib/sanitize-article-
 import type { InsightArticle } from '@/types';
 
 const articleShell =
-  'mx-auto w-full max-w-[1200px] px-5 sm:px-8 lg:px-[75px] xl:max-w-[1320px] xl:px-[120px]';
+  'mx-auto w-full max-w-[680px] px-5 sm:px-6';
 
 function authorInitials(authorName: string, authorRole: string): string {
   const n = authorName.trim();
@@ -97,7 +97,7 @@ export function BlogPostView({ article, articleUrl }: BlogPostViewProps) {
           <p className="font-poppins text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-[#005D51]">
             <time dateTime={article.date}>{article.date}</time>
           </p>
-          <h1 className="max-w-4xl font-lora text-xl font-bold leading-snug tracking-tight text-[#142218] sm:text-2xl md:text-3xl lg:text-[2rem]">
+          <h1 className="font-lora text-xl font-bold leading-snug tracking-tight text-[#142218] sm:text-2xl md:text-3xl lg:text-[2rem]">
             {article.title}
           </h1>
           {hasBody && article.description.trim() ? (
@@ -116,7 +116,7 @@ export function BlogPostView({ article, articleUrl }: BlogPostViewProps) {
             fill
             unoptimized
             className="object-cover"
-            sizes="(max-width: 1024px) 100vw, 1200px"
+            sizes="(max-width: 680px) 100vw, 680px"
             priority
           />
         </figure>
