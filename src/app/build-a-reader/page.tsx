@@ -2,8 +2,15 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 
 import { BuildAReaderClosingCta } from '@/components/build-a-reader/BuildAReaderClosingCta';
+import { BuildAReaderFaq } from '@/components/build-a-reader/BuildAReaderFaq';
 import { Header } from '@/components/sections/Header';
 import { Footer } from '@/components/sections/Footer';
+import { JsonLd } from '@/components/seo/JsonLd';
+import {
+  BUILD_A_READER_FAQ,
+  faqAnswerToPlainText,
+} from '@/constants/build-a-reader-faq';
+import { faqPageJsonLd } from '@/lib/seo/json-ld';
 import { buildPageMetadata } from '@/lib/seo/site';
 import { getSiteSettings } from '@/lib/site-settings-server';
 
@@ -29,9 +36,16 @@ const deckSlideSrc = (pdfPage: number) =>
 
 export default async function BuildAReaderProposalPage() {
   const settings = await getSiteSettings();
+  const faqSchema = faqPageJsonLd(
+    BUILD_A_READER_FAQ.map((item) => ({
+      question: item.question,
+      answer: faqAnswerToPlainText(item.answer),
+    })),
+  );
 
   return (
-    <main className="relative flex min-h-screen w-full flex-col bg-[#f4faf8]">
+    <main className="relative flex min-h-screen w-full flex-col bg-white">
+      <JsonLd data={faqSchema} />
       <Header contactEmail={settings.contactInfo.email} />
 
       <article className="w-full flex-1 pb-14 pt-8 md:pb-16 md:pt-10">
@@ -70,7 +84,7 @@ export default async function BuildAReaderProposalPage() {
 
         <section
           aria-labelledby="deck-heading"
-          className="w-full border-b border-[#005D51]/10 bg-[#eef6f3] px-5 py-10 sm:px-8 lg:px-[75px] xl:px-[120px]"
+          className="w-full border-b border-[#005D51]/10 bg-white px-5 py-10 sm:px-8 lg:px-[75px] xl:px-[120px]"
         >
           <div className="mx-auto w-full max-w-[1100px]">
             <h2
@@ -104,6 +118,7 @@ export default async function BuildAReaderProposalPage() {
                   </figure>
                 );
               })}
+              <BuildAReaderFaq embedded />
               <BuildAReaderClosingCta />
             </div>
           </div>
