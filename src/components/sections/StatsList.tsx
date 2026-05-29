@@ -1,6 +1,8 @@
+'use client';
 
 import React from 'react';
 
+import { AnimateOnView } from '@/components/motion/AnimateOnView';
 import { StatCard } from '@/components/ui/StatCard';
 import { StatRowSkeleton } from './StatRowSkeleton';
 import type { StatCardProps } from '@/types';
@@ -18,7 +20,9 @@ export function StatsList({ stats, loading }: StatsListProps) {
           <StatRowSkeleton key={index} />
         )) : stats.map((stat, index) => (
           <React.Fragment key={index}>
-            <StatCard value={stat.value} label={stat.label} />
+            <AnimateOnView delayMs={index * 120} className="w-full md:w-auto">
+              <StatCard value={stat.value} label={stat.label} />
+            </AnimateOnView>
             {index < stats.length - 1 && (
               <div className="w-full md:h-[64px] h-auto md:w-px border-t md:border-t-0 md:border-l border-white" />
             )}

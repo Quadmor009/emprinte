@@ -322,7 +322,6 @@ export function InsightArticleEditorClient() {
                   src={form.image}
                   alt=""
                   fill
-                  unoptimized
                   className="object-cover"
                 />
               </div>

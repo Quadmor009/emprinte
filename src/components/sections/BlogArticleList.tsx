@@ -44,7 +44,6 @@ function ArticleCard({
             src={article.image}
             alt={article.title}
             fill
-            unoptimized
             className="object-cover transition-[transform] duration-500 ease-out group-hover:scale-[1.02]"
             sizes={
               isFeatured

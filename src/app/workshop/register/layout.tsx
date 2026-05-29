@@ -1,10 +1,13 @@
 import type { Metadata } from 'next';
 
-export const metadata: Metadata = {
-  title: 'Workshop Registration | Emprinte Readers Hub',
+import { buildPageMetadata } from '@/lib/seo/site';
+
+export const metadata: Metadata = buildPageMetadata({
+  title: 'Workshop Registration',
   description:
     'Register for Practical Steps to Financial Independence — an exclusive Emprinte workshop.',
-};
+  path: '/workshop/register',
+});
 
 export default function WorkshopRegisterLayout({
   children,

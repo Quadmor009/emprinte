@@ -122,7 +122,6 @@ export function BlogPostView({
             src={article.image}
             alt={article.title}
             fill
-            unoptimized
             className="object-cover"
             sizes="(max-width: 680px) 100vw, 680px"
             priority

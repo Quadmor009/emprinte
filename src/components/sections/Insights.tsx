@@ -1,6 +1,9 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
 
+import { AnimateOnView } from '@/components/motion/AnimateOnView';
 import { articlePublicPath } from '@/lib/insight-slug';
 import type { InsightArticle } from '@/types';
 import { Badge } from '../ui';
@@ -21,7 +24,7 @@ export function Insights({ articles }: InsightsProps) {
       className="w-full bg-[#F0FFFD] px-4 py-12 sm:px-6 md:px-8 md:py-16 lg:px-[75px] lg:py-24 xl:px-[120px]"
     >
       <div className="mx-auto flex max-w-[1200px] flex-col gap-8 sm:gap-10 md:gap-12">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
+        <AnimateOnView className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
           <div className="flex flex-col gap-3 sm:gap-4">
             <Badge>Emprinte Insider</Badge>
             <h2 className="max-w-[600px] font-lora text-2xl font-bold leading-tight text-[#005D51] sm:text-3xl md:text-3xl lg:text-5xl">
@@ -35,14 +38,18 @@ export function Insights({ articles }: InsightsProps) {
             View all posts
             <span aria-hidden>→</span>
           </Link>
-        </div>
+        </AnimateOnView>
 
         <div className="flex flex-col gap-10 sm:gap-12 md:gap-14 lg:gap-16">
-          {articles.map((article) => {
+          {articles.map((article, index) => {
             const postHref = `/blog/${encodeURIComponent(articlePublicPath(article))}`;
             return (
-              <article
+              <AnimateOnView
                 key={article.id}
+                delayMs={index * 100}
+                className="w-full"
+              >
+              <article
                 className="flex w-full flex-col items-start gap-5 sm:gap-6 md:min-h-[280px] md:flex-row md:gap-6 lg:min-h-[333px] lg:gap-8"
               >
                 <div className="order-2 w-full shrink-0 md:order-1 md:w-auto md:min-w-[85px] lg:min-w-[140px]">
@@ -62,7 +69,6 @@ export function Insights({ articles }: InsightsProps) {
                     src={article.image}
                     alt={article.title}
                     fill
-                    unoptimized
                     className="rounded-2xl object-cover transition-[transform] duration-300 hover:scale-[1.02] sm:rounded-3xl"
                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 200px, 452px"
                   />
@@ -90,6 +96,7 @@ export function Insights({ articles }: InsightsProps) {
                   </Link>
                 </div>
               </article>
+              </AnimateOnView>
             );
           })}
         </div>

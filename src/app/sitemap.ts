@@ -35,6 +35,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: now,
     changeFrequency: 'monthly',
     priority: 0.75,
+    images: article.image?.trim() ? [article.image.trim()] : [],
   }));
 
   return [...staticEntries, ...articleEntries];

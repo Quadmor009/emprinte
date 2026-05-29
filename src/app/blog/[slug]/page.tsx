@@ -14,8 +14,9 @@ import { getPublicSiteOrigin } from '@/lib/public-site-url';
 import {
   articlePagePath,
   blogPostingJsonLd,
+  breadcrumbJsonLd,
 } from '@/lib/seo/json-ld';
-import { articleDateToIso, buildPageMetadata } from '@/lib/seo/site';
+import { absoluteUrl, articleDateToIso, buildPageMetadata } from '@/lib/seo/site';
 import { getSiteSettings } from '@/lib/site-settings-server';
 
 type PageProps = {
@@ -65,6 +66,13 @@ export default async function BlogPostPage({ params }: PageProps) {
   return (
     <main className="relative flex min-h-screen w-full flex-col bg-white">
       <JsonLd data={blogPostingJsonLd(article, articleUrl)} />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: 'Home', url: absoluteUrl('/') },
+          { name: 'Blog', url: absoluteUrl('/blog') },
+          { name: article.title, url: articleUrl },
+        ])}
+      />
       <Header contactEmail={settings.contactInfo.email} />
       <BlogPostView
         article={article}

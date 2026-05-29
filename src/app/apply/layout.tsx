@@ -1,10 +1,13 @@
 import type { Metadata } from 'next';
 
-export const metadata: Metadata = {
-  title: 'Apply | Emprinte Readers Hub',
+import { buildPageMetadata } from '@/lib/seo/site';
+
+export const metadata: Metadata = buildPageMetadata({
+  title: 'Apply',
   description:
     'Apply to join Emprinte Readers Hub — create your applicant account, complete the form, and submit your application fee receipt.',
-};
+  path: '/apply',
+});
 
 export default function ApplyLayout({
   children,

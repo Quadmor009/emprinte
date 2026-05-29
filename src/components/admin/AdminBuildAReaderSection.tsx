@@ -180,7 +180,6 @@ export function AdminBuildAReaderSection({ embedded }: AdminBuildAReaderSectionP
                       src={url}
                       alt=""
                       fill
-                      unoptimized
                       sizes="(max-width: 640px) 100vw, 50vw"
                       className="object-contain p-3"
                     />

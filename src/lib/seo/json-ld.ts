@@ -32,6 +32,25 @@ export function organizationJsonLd() {
     url: absoluteUrl('/'),
     logo: absoluteUrl('/Logo.png'),
     description: DEFAULT_DESCRIPTION,
+    sameAs: [
+      'https://www.instagram.com/emprintereaders',
+      'https://x.com/emprintereaders',
+    ],
+  };
+}
+
+export function breadcrumbJsonLd(
+  items: { name: string; url: string }[],
+) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: item.name,
+      item: item.url,
+    })),
   };
 }
 

@@ -1,4 +1,6 @@
-"use client"
+'use client';
+
+import { AnimateOnView } from '@/components/motion/AnimateOnView';
 
 export function Initiatives() {
   return (
@@ -6,7 +8,7 @@ export function Initiatives() {
       id="bootcamps"
       className="w-full bg-[#F0FFFD] px-6 py-8 xl:pt-[133px] lg:pt-[90px] md:pt-[80px] pt-[60px] lg:px-[75px] xl:px-[120px] flex flex-col gap-7"
     >
-      <div className="w-full flex flex-col  md:flex-row justify-between md:items-center  max-w-[1200px] mx-auto">
+      <AnimateOnView className="w-full flex flex-col  md:flex-row justify-between md:items-center  max-w-[1200px] mx-auto">
         <div className="flex flex-col gap-4  md:max-w-[500px]">
           <div className="flex h-6 px-4 justify-center items-center gap-2.5 rounded-3xl bg-[#E63715] w-fit">
             <span className="text-[10px] md:text-[14px] leading-[150%] font-normal text-white font-poppins">
@@ -77,7 +79,7 @@ export function Initiatives() {
             </button>
           </div>
         </div> */}
-      </div>
+      </AnimateOnView>
 
       {/* 5AM Club Bootcamp Card */}
     </section>

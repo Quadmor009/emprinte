@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { IoStar } from 'react-icons/io5';
 
+import { AnimateOnView } from '@/components/motion/AnimateOnView';
 import { TestimonialCardSkeleton } from './TestimonialCardSkeleton';
 import { getSameOriginApiUrl } from '@/lib/api';
 import { Testimonial } from '@/types';
@@ -38,12 +39,14 @@ export function Testimonials() {
     >
       {/* Same grid rail as Initiatives / BookClub / Newsletter: gutters + max-w-[1200px]. */}
       <div className="mx-auto w-full max-w-[1200px]">
-        <header className="flex flex-col gap-3 sm:gap-4">
-          <Badge>Testimonials</Badge>
-          <h2 className="max-w-4xl font-lora text-4xl font-bold leading-[1.08] tracking-tight text-[#005D51] md:text-5xl lg:text-6xl xl:text-[clamp(2.75rem,3.2vw+1.25rem,3.75rem)]">
-            Here is what our Readers have to say
-          </h2>
-        </header>
+        <AnimateOnView>
+          <header className="flex flex-col gap-3 sm:gap-4">
+            <Badge>Testimonials</Badge>
+            <h2 className="max-w-4xl font-lora text-4xl font-bold leading-[1.08] tracking-tight text-[#005D51] md:text-5xl lg:text-6xl xl:text-[clamp(2.75rem,3.2vw+1.25rem,3.75rem)]">
+              Here is what our Readers have to say
+            </h2>
+          </header>
+        </AnimateOnView>
 
         <div
           className="hide-scrollbar mt-6 flex snap-x snap-mandatory gap-5 overflow-x-auto overflow-y-hidden pb-4 sm:mt-8 sm:gap-6 lg:mt-8 xl:mt-10"
@@ -54,10 +57,14 @@ export function Testimonials() {
             ? Array.from({ length: SKELETON_COUNT }).map((_, i) => (
                 <TestimonialCardSkeleton key={i} />
               ))
-            : testimonials.map((testimonial) => (
-                <article
+            : testimonials.map((testimonial, index) => (
+                <AnimateOnView
                   key={testimonial.id}
-                  className="flex w-[min(340px,calc(100vw-3rem))] shrink-0 snap-start flex-col items-stretch gap-4 rounded-2xl bg-[#142218] p-6 sm:w-[340px] md:w-[380px]"
+                  delayMs={index * 80}
+                  className="flex w-[min(340px,calc(100vw-3rem))] shrink-0 snap-start sm:w-[340px] md:w-[380px]"
+                >
+                <article
+                  className="flex h-full w-full flex-col items-stretch gap-4 rounded-2xl bg-[#142218] p-6"
                 >
                   <div className="flex gap-1">
                     {Array.from({
@@ -81,6 +88,7 @@ export function Testimonials() {
                     </span>
                   </div>
                 </article>
+                </AnimateOnView>
               ))}
         </div>
       </div>

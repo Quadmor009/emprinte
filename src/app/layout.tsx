@@ -42,6 +42,7 @@ export const metadata: Metadata = {
     icon: [{ url: '/favicon.ico' }, { url: '/favicon.png', type: 'image/png' }],
     apple: '/apple-touch-icon.png',
   },
+  manifest: '/manifest.json',
   verification: {
     google: '-tp1ZZfh78sbwKsGIrmrVl6HkRW_i6S7oW3oNm92IaQ',
   },

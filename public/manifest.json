@@ -1,0 +1,26 @@
+{
+  "name": "Emprinte Readers Hub",
+  "short_name": "Emprinte",
+  "description": "Emprinte Readers Hub is a reading community in Africa — book clubs, literacy programs, and the #BuildAReader campaign.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#005D51",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/Logo.png",
+      "sizes": "340x125",
+      "type": "image/png"
+    }
+  ]
+}
