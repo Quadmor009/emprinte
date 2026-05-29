@@ -4,12 +4,18 @@ import { notFound } from 'next/navigation';
 import { Header } from '@/components/sections/Header';
 import { Footer } from '@/components/sections/Footer';
 import { BlogPostView } from '@/components/sections/BlogPostView';
+import { JsonLd } from '@/components/seo/JsonLd';
 import {
   fetchAdjacentInsightArticles,
   fetchInsightArticleBySlugParam,
 } from '@/lib/insights-public';
 import { articlePublicPath } from '@/lib/insight-slug';
 import { getPublicSiteOrigin } from '@/lib/public-site-url';
+import {
+  articlePagePath,
+  blogPostingJsonLd,
+} from '@/lib/seo/json-ld';
+import { articleDateToIso, buildPageMetadata } from '@/lib/seo/site';
 import { getSiteSettings } from '@/lib/site-settings-server';
 
 type PageProps = {
@@ -31,10 +37,15 @@ export async function generateMetadata({
   const desc =
     article.description.slice(0, 155) +
     (article.description.length > 155 ? '…' : '');
-  return {
-    title: `${article.title} | Emprinte Readers Hub`,
+  const path = articlePagePath(article);
+  return buildPageMetadata({
+    title: article.title,
     description: desc,
-  };
+    path,
+    image: article.image,
+    type: 'article',
+    publishedTime: articleDateToIso(article.date),
+  });
 }
 
 export default async function BlogPostPage({ params }: PageProps) {
@@ -53,6 +64,7 @@ export default async function BlogPostPage({ params }: PageProps) {
 
   return (
     <main className="relative flex min-h-screen w-full flex-col bg-white">
+      <JsonLd data={blogPostingJsonLd(article, articleUrl)} />
       <Header contactEmail={settings.contactInfo.email} />
       <BlogPostView
         article={article}

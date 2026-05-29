@@ -1,3 +1,5 @@
+import { insightArticles } from '@/constants/data';
+import { slugifyTitle } from '@/lib/insight-slug';
 import type { InsightArticle } from '@/types';
 
 /**
@@ -5,7 +7,10 @@ import type { InsightArticle } from '@/types';
  * not set (e.g. local dev). Production uses `landing_insights` via
  * `landing-insights-db.ts` — that data survives deploys.
  */
-let adminInsights: InsightArticle[] = [];
+let adminInsights: InsightArticle[] = insightArticles.map((article) => ({
+  ...article,
+  slug: article.slug?.trim() || slugifyTitle(article.title),
+}));
 
 export function getAllInsights(): InsightArticle[] {
   return [...adminInsights];

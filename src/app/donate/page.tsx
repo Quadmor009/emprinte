@@ -4,12 +4,14 @@ import { DonateForm } from '@/components/donate/DonateForm';
 import { Logo } from '@/components/ui/Logo';
 import { DONATE_PAGE_COPY } from '@/constants/donate';
 import { fetchBuildAReaderRow } from '@/lib/landing-build-a-reader-db';
+import { buildPageMetadata } from '@/lib/seo/site';
 
-export const metadata = {
-  title: 'Donate | #BuildAReader | Emprinte Readers Hub',
+export const metadata = buildPageMetadata({
+  title: 'Donate to #BuildAReader',
   description:
     'Support #BuildAReader with a secure Paystack donation. Fund books for young readers across our communities.',
-};
+  path: '/donate',
+});
 
 export default async function DonatePage() {
   const campaign = await fetchBuildAReaderRow();

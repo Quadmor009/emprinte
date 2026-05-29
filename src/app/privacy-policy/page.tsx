@@ -3,13 +3,15 @@ import Link from 'next/link';
 
 import { Header } from '@/components/sections/Header';
 import { Footer } from '@/components/sections/Footer';
+import { buildPageMetadata } from '@/lib/seo/site';
 import { getSiteSettings } from '@/lib/site-settings-server';
 
-export const metadata: Metadata = {
-  title: 'Privacy Policy | Emprinte Readers Hub',
+export const metadata: Metadata = buildPageMetadata({
+  title: 'Privacy Policy',
   description:
-    'How Emprinte collects, uses, stores, and shares information when you use the App.',
-};
+    'How Emprinte collects, uses, stores, and shares information when you use our website and mobile app.',
+  path: '/privacy-policy',
+});
 
 const shell =
   'mx-auto w-full max-w-[1200px] px-5 sm:px-8 lg:px-[75px] xl:max-w-[1320px] xl:px-[120px]';

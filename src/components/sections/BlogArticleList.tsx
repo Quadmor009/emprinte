@@ -21,8 +21,8 @@ function ArticleCard({
     <article
       className={
         isFeatured
-          ? 'group flex h-full flex-col rounded-2xl bg-white p-4 shadow-[0_1px_0_rgba(0,93,81,0.06),0_16px_48px_-20px_rgba(20,34,24,0.14)] ring-1 ring-[#005D51]/[0.07] sm:p-5 md:min-h-0 md:p-5 lg:p-6'
-          : 'group flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow-[0_1px_0_rgba(0,93,81,0.05),0_8px_28px_-16px_rgba(20,34,24,0.12)] ring-1 ring-[#005D51]/[0.06] transition-[box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_40px_-20px_rgba(20,34,24,0.16)] hover:ring-[#005D51]/15'
+          ? 'group flex h-full flex-col rounded-2xl bg-white p-4 ring-1 ring-[#005D51]/[0.07] sm:p-5 md:min-h-0 md:p-5 lg:p-6'
+          : 'group flex h-full flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-[#005D51]/[0.06] transition-[transform] duration-300 hover:-translate-y-0.5 hover:ring-[#005D51]/15'
       }
     >
       <Link
@@ -67,8 +67,8 @@ function ArticleCard({
           <h2
             className={
               isFeatured
-                ? 'font-lora text-lg font-bold leading-snug text-[#142218] transition-colors duration-200 group-hover:text-[#005D51] sm:text-xl md:text-2xl'
-                : 'font-lora text-base font-bold leading-snug text-[#142218] transition-colors duration-200 group-hover:text-[#005D51] md:text-lg'
+                ? 'font-poppins text-lg font-bold leading-snug text-[#142218] transition-colors duration-200 group-hover:text-[#005D51] sm:text-xl md:text-2xl'
+                : 'font-poppins text-base font-bold leading-snug text-[#142218] transition-colors duration-200 group-hover:text-[#005D51] md:text-lg'
             }
           >
             {article.title}
@@ -76,8 +76,8 @@ function ArticleCard({
           <p
             className={
               isFeatured
-                ? 'line-clamp-4 font-poppins text-sm leading-relaxed text-[#5a6570]'
-                : 'line-clamp-3 font-poppins text-xs leading-relaxed text-[#5a6570] md:text-sm'
+                ? 'line-clamp-4 font-lora text-sm leading-relaxed text-[#5a6570]'
+                : 'line-clamp-3 font-lora text-xs leading-relaxed text-[#5a6570] md:text-sm'
             }
           >
             {article.description}
@@ -98,7 +98,7 @@ export function BlogArticleList({ articles }: BlogArticleListProps) {
   const [featured, ...rest] = articles;
 
   return (
-    <div className="w-full bg-[#f4faf8]">
+    <div className="w-full bg-[#F9F9F9]">
       <div className="w-full border-b border-white/10 bg-[#172219]">
         <div className="mx-auto w-full max-w-[1200px] px-5 py-10 sm:px-8 sm:py-12 md:px-10 md:py-14 lg:px-[75px] lg:py-16 xl:max-w-[1320px] xl:px-[120px]">
           <div className="flex w-full flex-col gap-8 md:flex-row md:items-end md:justify-between md:gap-12 lg:gap-16">
@@ -106,16 +106,16 @@ export function BlogArticleList({ articles }: BlogArticleListProps) {
               <p className="font-poppins text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-white">
                 Read here — no paywall
               </p>
-              <h1 className="font-lora text-2xl font-bold leading-tight tracking-tight text-white sm:text-3xl lg:text-4xl">
+              <h1 className="font-poppins text-2xl font-bold leading-tight tracking-tight text-white sm:text-3xl lg:text-4xl">
                 Blog
               </h1>
-              <p className="max-w-xl font-poppins text-sm leading-relaxed text-white sm:text-base lg:text-[1.05rem]">
+              <p className="max-w-xl font-lora text-sm leading-relaxed text-white sm:text-base lg:text-[1.05rem]">
                 Long-form pieces meant to be read calmly on this page—stories
                 and ideas from the Emprinte community.
               </p>
             </div>
             <p className="hidden shrink-0 md:block md:max-w-[268px] md:text-right lg:max-w-[320px]">
-              <span className="font-poppins text-xs leading-relaxed text-white lg:text-sm">
+              <span className="font-lora text-xs leading-relaxed text-white lg:text-sm">
                 Dispatches from real reading rooms—the off-agenda debates,
                 drought weeks nobody talks about, and the small thing that makes
                 someone open the next chapter anyway.
@@ -131,10 +131,10 @@ export function BlogArticleList({ articles }: BlogArticleListProps) {
       >
         {articles.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-[#005D51]/25 bg-white/80 px-6 py-12 text-center">
-            <p className="font-lora text-base font-semibold text-[#142218]">
+            <p className="font-poppins text-base font-semibold text-[#142218]">
               New stories are on the way
             </p>
-            <p className="mx-auto mt-2 max-w-md font-poppins text-xs leading-relaxed text-[#5a6570] sm:text-sm">
+            <p className="mx-auto mt-2 max-w-md font-lora text-xs leading-relaxed text-[#5a6570] sm:text-sm">
               There are no posts to show yet. Please check back soon.
             </p>
           </div>

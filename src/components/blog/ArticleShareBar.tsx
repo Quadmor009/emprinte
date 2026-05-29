@@ -51,7 +51,7 @@ export function ArticleShareBar({
           <p className="font-poppins text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-[#005D51]">
             Share
           </p>
-          <p className="mt-1 font-lora text-sm font-semibold text-[#142218] sm:text-base">
+          <p className="mt-1 font-poppins text-sm font-semibold text-[#142218] sm:text-base">
             Spread the word
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-2.5">

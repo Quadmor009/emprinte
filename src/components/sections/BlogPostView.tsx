@@ -1,14 +1,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { ArticlePostNav } from '@/components/blog/ArticlePostNav';
+import { ArticlePostNavigation } from '@/components/blog/ArticlePostNav';
 import { ArticleShareBar } from '@/components/blog/ArticleShareBar';
 import { isProbablyRichHtml, sanitizeArticleHtml } from '@/lib/sanitize-article-html';
 import type { InsightArticle } from '@/types';
 
-const articleLayout =
-  'mx-auto grid w-full max-w-[1140px] grid-cols-1 gap-x-6 px-5 sm:px-6 lg:grid-cols-[minmax(0,11.75rem)_minmax(0,680px)_minmax(0,11.75rem)] lg:gap-x-8 xl:max-w-[1200px] xl:gap-x-10';
-const articleColumn = 'min-w-0 w-full max-w-[680px] justify-self-center lg:max-w-none';
+const articleShell = 'mx-auto w-full max-w-[680px] px-5 sm:px-6';
 
 function authorInitials(authorName: string, authorRole: string): string {
   const n = authorName.trim();
@@ -44,7 +42,7 @@ function ArticleParagraphs({ text, isLead }: { text: string; isLead?: boolean })
             className={
               lead
                 ? 'font-lora text-base leading-relaxed text-[#142218] sm:text-lg'
-                : 'font-poppins text-sm leading-[1.75] text-[#2d3640] sm:text-base sm:leading-[1.72]'
+                : 'font-lora text-base leading-[1.75] text-[#2d3640] sm:text-[1.0625rem] sm:leading-[1.72]'
             }
           >
             {block}
@@ -61,7 +59,7 @@ function ArticleBodyContent({ text, isLead }: { text: string; isLead?: boolean }
     if (!html) return null;
     return (
       <div
-        className="article-body max-w-none font-poppins text-sm leading-[1.75] text-[#2d3640] sm:text-base sm:leading-[1.72] [&_a]:text-[#005D51] [&_blockquote]:my-6 [&_blockquote]:border-l-2 [&_blockquote]:border-[#005D51]/25 [&_blockquote]:pl-4 [&_blockquote]:font-lora [&_blockquote]:italic [&_blockquote]:text-[#4d575f] [&_h2]:mt-10 [&_h2]:font-lora [&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-[#142218] [&_h2]:first:mt-0 [&_h3]:mt-8 [&_h3]:font-lora [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-[#142218] [&_li]:my-1.5 [&_ol]:my-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:my-4 [&_p]:first:mt-0 [&_p]:last:mb-0 [&_strong]:font-semibold [&_strong]:text-[#142218] [&_ul]:my-4 [&_ul]:list-disc [&_ul]:pl-6"
+        className="article-body max-w-none font-lora text-base leading-[1.75] text-[#2d3640] sm:text-[1.0625rem] sm:leading-[1.72] [&_a]:text-[#005D51] [&_blockquote]:my-6 [&_blockquote]:border-l-2 [&_blockquote]:border-[#005D51]/25 [&_blockquote]:pl-4 [&_blockquote]:font-lora [&_blockquote]:italic [&_blockquote]:text-[#4d575f] [&_h2]:mt-10 [&_h2]:font-poppins [&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-[#142218] [&_h2]:first:mt-0 [&_h3]:mt-8 [&_h3]:font-poppins [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-[#142218] [&_li]:my-1.5 [&_ol]:my-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:my-4 [&_p]:first:mt-0 [&_p]:last:mb-0 [&_strong]:font-semibold [&_strong]:text-[#142218] [&_ul]:my-4 [&_ul]:list-disc [&_ul]:pl-6"
         dangerouslySetInnerHTML={{ __html: html }}
       />
     );
@@ -91,21 +89,11 @@ export function BlogPostView({
     ? article.body!.trim()
     : article.description.trim();
 
-  const showMobileNav = Boolean(previousArticle || nextArticle);
+  const showPostNav = Boolean(previousArticle || nextArticle);
 
   return (
     <article className="w-full bg-white">
-      <div className={`${articleLayout} pt-7 pb-14 md:pt-9 md:pb-16`}>
-        <aside
-          className="hidden pt-1 lg:block lg:self-start"
-          aria-label="Previous article"
-        >
-          {previousArticle ? (
-            <ArticlePostNav article={previousArticle} direction="previous" />
-          ) : null}
-        </aside>
-
-        <div className={articleColumn}>
+      <div className={`${articleShell} pt-7 pb-14 md:pt-9 md:pb-16`}>
         <Link
           href="/blog"
           className="inline-flex items-center gap-1 font-poppins text-xs font-semibold text-[#005D51] transition-colors hover:text-[#004438]"
@@ -118,7 +106,7 @@ export function BlogPostView({
           <p className="font-poppins text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-[#005D51]">
             <time dateTime={article.date}>{article.date}</time>
           </p>
-          <h1 className="font-lora text-xl font-bold leading-snug tracking-tight text-[#142218] sm:text-2xl md:text-3xl lg:text-[2rem]">
+          <h1 className="font-poppins text-xl font-bold leading-snug tracking-tight text-[#142218] sm:text-2xl md:text-3xl lg:text-[2rem]">
             {article.title}
           </h1>
           {hasBody && article.description.trim() ? (
@@ -129,7 +117,7 @@ export function BlogPostView({
         </header>
 
         <div className="pt-7 md:pt-9">
-        <figure className="relative aspect-2/1 w-full overflow-hidden rounded-xl bg-[#dfecea] shadow-[0_12px_36px_-20px_rgba(20,34,24,0.28)] ring-1 ring-[#005D51]/10 lg:max-h-[min(480px,52vh)] lg:min-h-[260px]">
+        <figure className="relative aspect-2/1 w-full overflow-hidden rounded-xl bg-[#dfecea] ring-1 ring-[#005D51]/10 lg:max-h-[min(480px,52vh)] lg:min-h-[260px]">
           <Image
             src={article.image}
             alt={article.title}
@@ -197,7 +185,7 @@ export function BlogPostView({
                     {article.authorName?.trim() ? (
                       <p
                         id="blog-post-author-name"
-                        className="mt-2 font-lora text-xl font-semibold leading-snug tracking-tight text-[#142218] sm:text-2xl"
+                        className="mt-2 font-poppins text-xl font-semibold leading-snug tracking-tight text-[#142218] sm:text-2xl"
                       >
                         {article.authorName.trim()}
                       </p>
@@ -213,38 +201,14 @@ export function BlogPostView({
             </aside>
           ) : null}
 
-          {showMobileNav ? (
-            <nav
-              className="mt-12 flex flex-col gap-3 border-t border-[#005D51]/10 pt-10 sm:flex-row sm:gap-4 lg:hidden"
-              aria-label="More articles"
-            >
-              {previousArticle ? (
-                <ArticlePostNav
-                  article={previousArticle}
-                  direction="previous"
-                  variant="inline"
-                />
-              ) : (
-                <div className="hidden flex-1 sm:block" aria-hidden />
-              )}
-              {nextArticle ? (
-                <ArticlePostNav
-                  article={nextArticle}
-                  direction="next"
-                  variant="inline"
-                />
-              ) : null}
-            </nav>
+          {showPostNav ? (
+            <ArticlePostNavigation
+              previousArticle={previousArticle}
+              nextArticle={nextArticle}
+            />
           ) : null}
         </div>
         </div>
-        </div>
-
-        <aside className="hidden pt-1 lg:block lg:self-start" aria-label="Next article">
-          {nextArticle ? (
-            <ArticlePostNav article={nextArticle} direction="next" />
-          ) : null}
-        </aside>
       </div>
     </article>
   );

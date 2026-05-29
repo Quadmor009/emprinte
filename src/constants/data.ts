@@ -13,7 +13,7 @@ import type {
 
 export const navigationLinks: NavigationLink[] = [
   { label: 'About Us', href: '#about' },
-  { label: 'Initiatives', href: '#initiatives' },
+  { label: 'BuildAReader', href: '/build-a-reader' },
   { label: 'Bootcamps', href: '#bootcamps' },
   { label: 'Blog', href: '/blog' },
 ];

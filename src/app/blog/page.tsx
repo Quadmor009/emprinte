@@ -4,13 +4,17 @@ import { Header } from '@/components/sections/Header';
 import { Footer } from '@/components/sections/Footer';
 import { BlogArticleList } from '@/components/sections/BlogArticleList';
 import { fetchInsightArticlesList } from '@/lib/insights-public';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { blogIndexJsonLd } from '@/lib/seo/json-ld';
+import { buildPageMetadata } from '@/lib/seo/site';
 import { getSiteSettings } from '@/lib/site-settings-server';
 
-export const metadata: Metadata = {
-  title: 'Blog | Emprinte Readers Hub',
+export const metadata: Metadata = buildPageMetadata({
+  title: 'Blog',
   description:
-    'Stories and updates from Emprinte Readers Hub — reading that changes the world.',
-};
+    'Stories and ideas from Emprinte Readers Hub — reading culture, book clubs, and community across Africa.',
+  path: '/blog',
+});
 
 
 
@@ -20,6 +24,7 @@ export default async function BlogPage() {
 
   return (
     <main className="relative flex min-h-screen w-full flex-col bg-white">
+      <JsonLd data={blogIndexJsonLd()} />
       <Header contactEmail={settings.contactInfo.email} />
       <BlogArticleList articles={articles} />
       <Footer contactInfo={settings.contactInfo} />

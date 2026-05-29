@@ -3,99 +3,80 @@ import Link from 'next/link';
 import { articlePublicPath } from '@/lib/insight-slug';
 import type { InsightArticle } from '@/types';
 
-type ArticlePostNavProps = {
+type ArticlePostNavLinkProps = {
   article: InsightArticle;
   direction: 'previous' | 'next';
-  variant?: 'side' | 'inline';
 };
 
-const cardBase =
-  'group block rounded-xl border border-[#005D51]/10 bg-[#fafcfb] p-4 transition-[border-color,background-color,box-shadow] duration-200 hover:border-[#005D51]/22 hover:bg-white hover:shadow-[0_8px_28px_-18px_rgba(20,34,24,0.18)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#005D51]';
+const linkBase =
+  'group block min-w-0 py-3 transition-[transform,background-color] duration-200 hover:-translate-y-0.5 hover:bg-[rgba(0,93,81,0.05)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#005D51] sm:max-w-[min(100%,18rem)] sm:px-4 sm:py-4';
 
-export function ArticlePostNav({
-  article,
-  direction,
-  variant = 'side',
-}: ArticlePostNavProps) {
+function ArticlePostNavLink({ article, direction }: ArticlePostNavLinkProps) {
   const href = `/blog/${encodeURIComponent(articlePublicPath(article))}`;
   const isPrevious = direction === 'previous';
   const label = isPrevious ? 'Previous article' : 'Next article';
-
-  if (variant === 'inline') {
-    return (
-      <Link
-        href={href}
-        aria-label={`${label}: ${article.title}`}
-        className={[
-          cardBase,
-          'min-w-0 flex-1',
-          isPrevious ? 'text-left' : 'text-right',
-        ].join(' ')}
-      >
-        <span
-          className={[
-            'flex items-center gap-1.5 font-poppins text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#005D51]',
-            isPrevious ? 'justify-start' : 'justify-end',
-          ].join(' ')}
-        >
-          {isPrevious ? (
-            <>
-              <span aria-hidden className="text-sm leading-none">
-                ←
-              </span>
-              <span>Previous</span>
-            </>
-          ) : (
-            <>
-              <span>Next</span>
-              <span aria-hidden className="text-sm leading-none">
-                →
-              </span>
-            </>
-          )}
-        </span>
-        <span className="mt-2 block font-lora text-sm font-medium leading-snug text-[#142218] line-clamp-2 group-hover:text-[#005D51]">
-          {article.title}
-        </span>
-      </Link>
-    );
-  }
 
   return (
     <Link
       href={href}
       aria-label={`${label}: ${article.title}`}
-      className={[
-        cardBase,
-        'sticky top-28 w-full max-w-[11.75rem]',
-        isPrevious ? 'ml-auto text-right' : 'mr-auto text-left',
-      ].join(' ')}
+      className={[linkBase, isPrevious ? 'text-left' : 'text-right sm:ml-auto'].join(
+        ' ',
+      )}
     >
       <span
         className={[
-          'flex items-center gap-1.5 font-poppins text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#005D51]',
-          isPrevious ? 'justify-end' : 'justify-start',
+          'flex items-center gap-1 font-poppins text-xs text-[#7a858f] transition-colors group-hover:text-[#005D51]/80',
+          isPrevious ? 'justify-start' : 'justify-end',
         ].join(' ')}
       >
         {isPrevious ? (
           <>
-            <span aria-hidden className="text-sm leading-none">
-              ←
-            </span>
+            <span aria-hidden>←</span>
             <span>Previous</span>
           </>
         ) : (
           <>
             <span>Next</span>
-            <span aria-hidden className="text-sm leading-none">
-              →
-            </span>
+            <span aria-hidden>→</span>
           </>
         )}
       </span>
-      <span className="mt-2.5 block font-lora text-[0.8125rem] leading-[1.45] text-[#4d575f] line-clamp-3 group-hover:text-[#142218]">
+      <span className="mt-2 block font-poppins text-base font-semibold leading-snug text-[#142218] transition-colors group-hover:text-[#005D51] sm:text-lg sm:leading-snug">
         {article.title}
       </span>
     </Link>
+  );
+}
+
+type ArticlePostNavigationProps = {
+  previousArticle?: InsightArticle | null;
+  nextArticle?: InsightArticle | null;
+};
+
+export function ArticlePostNavigation({
+  previousArticle = null,
+  nextArticle = null,
+}: ArticlePostNavigationProps) {
+  if (!previousArticle && !nextArticle) {
+    return null;
+  }
+
+  return (
+    <nav
+      aria-label="Continue reading"
+      className="mt-12 border-t border-[#005D51]/10 pt-10 md:mt-16 md:pt-12"
+    >
+      <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between sm:gap-12">
+        {previousArticle ? (
+          <ArticlePostNavLink article={previousArticle} direction="previous" />
+        ) : (
+          <div className="hidden min-w-0 flex-1 sm:block" aria-hidden />
+        )}
+        {nextArticle ? (
+          <ArticlePostNavLink article={nextArticle} direction="next" />
+        ) : null}
+      </div>
+    </nav>
   );
 }

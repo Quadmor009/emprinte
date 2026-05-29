@@ -3,13 +3,15 @@ import Link from 'next/link';
 
 import { Header } from '@/components/sections/Header';
 import { Footer } from '@/components/sections/Footer';
+import { buildPageMetadata } from '@/lib/seo/site';
 import { getSiteSettings } from '@/lib/site-settings-server';
 
-export const metadata: Metadata = {
-  title: 'Request account deletion | Emprinte Readers Hub',
+export const metadata: Metadata = buildPageMetadata({
+  title: 'Request account deletion',
   description:
     'How to ask us to delete your Emprinte account and associated data.',
-};
+  path: '/request-account-deletion',
+});
 
 const shell =
   'mx-auto w-full max-w-[1200px] px-5 sm:px-8 lg:px-[75px] xl:max-w-[1320px] xl:px-[120px]';

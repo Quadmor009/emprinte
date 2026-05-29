@@ -4,13 +4,15 @@ import Image from 'next/image';
 import { BuildAReaderClosingCta } from '@/components/build-a-reader/BuildAReaderClosingCta';
 import { Header } from '@/components/sections/Header';
 import { Footer } from '@/components/sections/Footer';
+import { buildPageMetadata } from '@/lib/seo/site';
 import { getSiteSettings } from '@/lib/site-settings-server';
 
-export const metadata: Metadata = {
-  title: '#BuildAReader | Partnership Proposal | Emprinte Readers Hub',
+export const metadata: Metadata = buildPageMetadata({
+  title: '#BuildAReader Partnership Proposal',
   description:
     'Partnership proposal for #BuildAReader: making readers out of Africa for transformational leadership through books, mentorship, and impact.',
-};
+  path: '/build-a-reader',
+});
 
 const shell =
   'mx-auto w-full max-w-[1200px] px-5 sm:px-8 lg:px-[75px] xl:max-w-[1320px] xl:px-[120px]';
