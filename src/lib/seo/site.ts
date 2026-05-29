@@ -4,7 +4,7 @@ export const SITE_NAME = 'Emprinte Readers Hub';
 export const DEFAULT_DESCRIPTION =
   'Emprinte Readers Hub is a reading community in Africa — book clubs, literacy programs, and the #BuildAReader campaign.';
 
-const DEFAULT_OG_IMAGE = '/Logo.png';
+export const DEFAULT_OG_IMAGE = '/og.png';
 
 export function getSiteOrigin(): string {
   return (

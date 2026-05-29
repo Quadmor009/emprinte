@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Lora, Poppins } from 'next/font/google';
 
 import { AppToaster } from '@/components/AppToaster';
-import { DEFAULT_DESCRIPTION, getSiteOrigin, SITE_NAME } from '@/lib/seo/site';
+import { DEFAULT_DESCRIPTION, DEFAULT_OG_IMAGE, getSiteOrigin, SITE_NAME } from '@/lib/seo/site';
 import './globals.css';
 
 const lora = Lora({
@@ -30,13 +30,13 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     title: 'Transforming Africa, One Book at a Time',
     description: DEFAULT_DESCRIPTION,
-    images: [{ url: '/Logo.png', alt: SITE_NAME }],
+    images: [{ url: DEFAULT_OG_IMAGE, alt: SITE_NAME }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Transforming Africa, One Book at a Time',
     description: DEFAULT_DESCRIPTION,
-    images: ['/Logo.png'],
+    images: [DEFAULT_OG_IMAGE],
   },
   icons: {
     icon: [{ url: '/favicon.ico' }, { url: '/favicon.png', type: 'image/png' }],

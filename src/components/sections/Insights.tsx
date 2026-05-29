@@ -21,11 +21,20 @@ export function Insights({ articles }: InsightsProps) {
       className="w-full bg-[#F0FFFD] px-4 py-12 sm:px-6 md:px-8 md:py-16 lg:px-[75px] lg:py-24 xl:px-[120px]"
     >
       <div className="mx-auto flex max-w-[1200px] flex-col gap-8 sm:gap-10 md:gap-12">
-        <div className="flex flex-col gap-3 sm:gap-4">
-          <Badge>Emprinte Insider</Badge>
-          <h2 className="max-w-[600px] font-lora text-2xl font-bold leading-tight text-[#005D51] sm:text-3xl md:text-3xl lg:text-5xl">
-            Explore Insights from Emprinte Readers
-          </h2>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
+          <div className="flex flex-col gap-3 sm:gap-4">
+            <Badge>Emprinte Insider</Badge>
+            <h2 className="max-w-[600px] font-lora text-2xl font-bold leading-tight text-[#005D51] sm:text-3xl md:text-3xl lg:text-5xl">
+              Explore Insights from Emprinte Readers
+            </h2>
+          </div>
+          <Link
+            href="/blog"
+            className="inline-flex shrink-0 items-center gap-1.5 font-poppins text-sm font-semibold text-[#005D51] underline-offset-4 transition-colors hover:text-[#004840] hover:underline sm:text-base"
+          >
+            View all posts
+            <span aria-hidden>→</span>
+          </Link>
         </div>
 
         <div className="flex flex-col gap-10 sm:gap-12 md:gap-14 lg:gap-16">
@@ -45,21 +54,29 @@ export function Insights({ articles }: InsightsProps) {
                   </time>
                 </div>
 
-                <div className="relative order-1 aspect-400/280 w-full shrink-0 overflow-hidden rounded-lg md:order-2 md:w-[200px] lg:w-[300px] xl:w-[452px]">
+                <Link
+                  href={postHref}
+                  className="relative order-1 aspect-400/280 w-full shrink-0 overflow-hidden rounded-lg md:order-2 md:w-[200px] lg:w-[300px] xl:w-[452px]"
+                >
                   <Image
                     src={article.image}
-                    alt=""
+                    alt={article.title}
                     fill
                     unoptimized
-                    className="rounded-2xl object-cover sm:rounded-3xl"
+                    className="rounded-2xl object-cover transition-[transform] duration-300 hover:scale-[1.02] sm:rounded-3xl"
                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 200px, 452px"
                   />
-                </div>
+                </Link>
 
                 <div className="order-3 flex min-w-0 flex-1 flex-col justify-between gap-3 md:gap-4">
                   <div className="flex flex-col gap-2 md:gap-3 lg:gap-4">
                     <h3 className="font-poppins text-xl font-semibold leading-tight text-gray-900 sm:text-2xl md:text-lg lg:text-3xl">
-                      {article.title}
+                      <Link
+                        href={postHref}
+                        className="transition-colors hover:text-[#005D51]"
+                      >
+                        {article.title}
+                      </Link>
                     </h3>
                     <p className="font-poppins text-base font-medium leading-tight text-[#7B7B7B] sm:text-lg md:text-sm lg:text-xl">
                       {article.description}
