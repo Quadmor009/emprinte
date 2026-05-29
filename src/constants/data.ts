@@ -20,8 +20,9 @@ export const navigationLinks: NavigationLink[] = [
 
 export const footerNavigation: NavigationLink[] = [
   { label: 'Home', href: '/' },
+  { label: 'Blog', href: '/blog' },
   { label: 'Bootcamps', href: '/#bootcamps' },
-  { label: 'Initiatives', href: '/#initiatives' },
+  { label: 'BuildAReader', href: '/build-a-reader' },
   { label: 'About Us', href: '/#about' },
   { label: 'Privacy Policy', href: '/privacy-policy' },
   {

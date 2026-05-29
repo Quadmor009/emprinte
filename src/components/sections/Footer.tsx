@@ -73,8 +73,8 @@ export function Footer({
                   <Link href="/#bootcamps" className={navLinkClass}>
                     Bootcamps
                   </Link>
-                  <Link href="/#initiatives" className={navLinkClass}>
-                    Initiatives
+                  <Link href="/build-a-reader" className={navLinkClass}>
+                    BuildAReader
                   </Link>
                   <Link href="/#about" className={navLinkClass}>
                     About Us
