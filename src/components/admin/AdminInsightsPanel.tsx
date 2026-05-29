@@ -1,7 +1,7 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
+import { useState } from 'react';
 
 import { useAdminInsights } from '@/hooks/admin/useAdminInsights';
 import { articlePublicPath } from '@/lib/insight-slug';
@@ -48,18 +48,29 @@ function AdminBlogPostCard({
   onDelete: () => void;
 }) {
   const path = articlePublicPath(article);
+  const [imageBroken, setImageBroken] = useState(false);
 
   return (
     <article className={adminBlogCardShell}>
       <div className="relative aspect-2/1 w-full shrink-0 overflow-hidden bg-[#e4f2ef]">
-        <Image
-          src={article.image}
-          alt={article.title}
-          fill
-          unoptimized
-          className="object-cover"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-        />
+        {imageBroken ? (
+          <div className="flex h-full flex-col items-center justify-center gap-1 px-4 text-center">
+            <p className="font-poppins text-xs font-semibold text-[#005D51]">
+              Image could not load
+            </p>
+            <p className="font-poppins text-[10px] leading-snug text-[#5a6570]">
+              Edit this post and use Upload image, or fix the Image URL.
+            </p>
+          </div>
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element -- admin preview; avoids Next image host rules on bad URLs
+          <img
+            src={article.image}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+            onError={() => setImageBroken(true)}
+          />
+        )}
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col gap-2 p-4 md:gap-2.5 md:p-5">

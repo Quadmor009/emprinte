@@ -31,7 +31,7 @@ export async function POST(request: Request) {
       {
         error: 'Cloudinary is not configured',
         message:
-          'Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET.',
+          'Image upload is not configured on the server. Add CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET in Vercel (see DEPLOY.md), or paste an image URL in the form instead.',
       },
       { status: 503 },
     );

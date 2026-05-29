@@ -16,6 +16,7 @@ import {
   uploadImageToCloudinary,
   validateJpegPngUnder3Mb,
 } from '@/lib/client-cloudinary-upload';
+import { validateArticleImageUrl } from '@/lib/article-image-url';
 import { slugifyTitle } from '@/lib/insight-slug';
 import { getSameOriginApiUrl } from '@/lib/api';
 import type { InsightArticle } from '@/types';
@@ -159,6 +160,7 @@ export function InsightArticleEditorClient() {
   }, [status, router]);
 
   const suggestedSlug = slugifyTitle(form.title);
+  const imageUrlWarning = form.image ? validateArticleImageUrl(form.image) : null;
 
   if (editId && loadingArticle) {
     return (
@@ -310,8 +312,8 @@ export function InsightArticleEditorClient() {
                 {uploadingImage ? 'Uploading…' : 'Upload image'}
               </button>
               <span className="font-poppins text-xs font-medium text-[#5a6570]">
-                JPG or PNG, up to 3 MB. Crop to 2:1 before upload, or paste a URL
-                below.
+                JPG or PNG, up to 3 MB. A crop step matches the wide cover on the
+                public article (2:1), or paste any image URL below.
               </span>
             </div>
             {form.image ? (
@@ -336,10 +338,18 @@ export function InsightArticleEditorClient() {
             label="Image URL"
             type="url"
             value={form.image}
-            onChange={(e) => setField('image', e.target.value)}
-            placeholder="https://…"
+            onChange={(e) => {
+              setField('image', e.target.value);
+              setUploadError(null);
+            }}
+            placeholder="Filled automatically after upload"
             required
           />
+          {imageUrlWarning ? (
+            <p className="font-poppins text-sm font-medium text-amber-800" role="status">
+              {imageUrlWarning}
+            </p>
+          ) : null}
         </div>
 
         <LabeledInput

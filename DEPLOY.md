@@ -25,6 +25,15 @@ Set in Vercel → **emprinte** → **Environment Variables**:
 - `SUPABASE_SERVICE_ROLE_KEY` (required for blog posts and admin writes)
 - `NEXT_PUBLIC_SITE_URL` = `https://www.emprintereaders.com`
 - Paystack keys as needed
+- **Cloudinary** (required for blog/admin image uploads — without these, “New story” shows a red error and upload does nothing):
+  - `CLOUDINARY_CLOUD_NAME`
+  - `CLOUDINARY_API_KEY`
+  - `CLOUDINARY_API_SECRET`
+  - Optional: `CLOUDINARY_UPLOAD_FOLDER` (defaults to `emprinte/blog`)
+
+Copy values from [Cloudinary Dashboard](https://console.cloudinary.com/) → **API Keys**, or from your local `emprinte/.env` if already set. After adding vars, **Redeploy** the latest production deployment.
+
+**Workaround:** paste a public `https://` image URL in **Image URL** (no Cloudinary upload needed).
 
 ## Do not set on Vercel (unless you use a separate auth API)
 
@@ -43,4 +52,4 @@ Set in Vercel → **emprinte** → **Environment Variables**:
 npm run dev -w emprinte
 ```
 
-Copy `.env.example` to `.env.local` and add Supabase + Paystack keys. Do not copy `NEXT_PUBLIC_API_URL` from legacy `.env` unless you run `emprinte-backend` on port 3001.
+Copy `.env.example` to `.env.local` and add Supabase, Paystack, and Cloudinary keys. Do not copy `NEXT_PUBLIC_API_URL` from legacy `.env` unless you run `emprinte-backend` on port 3001.

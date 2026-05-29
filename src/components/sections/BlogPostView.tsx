@@ -1,12 +1,14 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
+import { ArticlePostNav } from '@/components/blog/ArticlePostNav';
 import { ArticleShareBar } from '@/components/blog/ArticleShareBar';
 import { isProbablyRichHtml, sanitizeArticleHtml } from '@/lib/sanitize-article-html';
 import type { InsightArticle } from '@/types';
 
-const articleShell =
-  'mx-auto w-full max-w-[680px] px-5 sm:px-6';
+const articleLayout =
+  'mx-auto grid w-full max-w-[1100px] grid-cols-1 gap-x-8 px-5 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,680px)_minmax(0,1fr)] lg:gap-x-10 xl:max-w-[1180px]';
+const articleColumn = 'min-w-0 w-full max-w-[680px] justify-self-center lg:max-w-none';
 
 function authorInitials(authorName: string, authorRole: string): string {
   const n = authorName.trim();
@@ -70,9 +72,16 @@ function ArticleBodyContent({ text, isLead }: { text: string; isLead?: boolean }
 type BlogPostViewProps = {
   article: InsightArticle;
   articleUrl: string;
+  previousArticle?: InsightArticle | null;
+  nextArticle?: InsightArticle | null;
 };
 
-export function BlogPostView({ article, articleUrl }: BlogPostViewProps) {
+export function BlogPostView({
+  article,
+  articleUrl,
+  previousArticle = null,
+  nextArticle = null,
+}: BlogPostViewProps) {
   const hasBody = Boolean(article.body?.trim());
   const showExternal =
     Boolean(article.href?.trim()) &&
@@ -82,9 +91,21 @@ export function BlogPostView({ article, articleUrl }: BlogPostViewProps) {
     ? article.body!.trim()
     : article.description.trim();
 
+  const showMobileNav = Boolean(previousArticle || nextArticle);
+
   return (
     <article className="w-full bg-white">
-      <div className={`${articleShell} pt-7 pb-9 md:pt-9 md:pb-10`}>
+      <div className={`${articleLayout} pt-7 pb-14 md:pt-9 md:pb-16`}>
+        <aside
+          className="hidden min-h-[120px] lg:block"
+          aria-label="Previous article"
+        >
+          {previousArticle ? (
+            <ArticlePostNav article={previousArticle} direction="previous" />
+          ) : null}
+        </aside>
+
+        <div className={articleColumn}>
         <Link
           href="/blog"
           className="inline-flex items-center gap-1 font-poppins text-xs font-semibold text-[#005D51] transition-colors hover:text-[#004438]"
@@ -106,9 +127,8 @@ export function BlogPostView({ article, articleUrl }: BlogPostViewProps) {
             </p>
           ) : null}
         </header>
-      </div>
 
-      <div className={`${articleShell} pb-14 pt-7 md:pb-16 md:pt-9`}>
+        <div className="pt-7 md:pt-9">
         <figure className="relative aspect-2/1 w-full overflow-hidden rounded-xl bg-[#dfecea] shadow-[0_12px_36px_-20px_rgba(20,34,24,0.28)] ring-1 ring-[#005D51]/10 lg:max-h-[min(480px,52vh)] lg:min-h-[260px]">
           <Image
             src={article.image}
@@ -192,7 +212,39 @@ export function BlogPostView({ article, articleUrl }: BlogPostViewProps) {
               </div>
             </aside>
           ) : null}
+
+          {showMobileNav ? (
+            <nav
+              className="mt-12 flex flex-col gap-3 border-t border-[#005D51]/10 pt-10 sm:flex-row sm:gap-4 lg:hidden"
+              aria-label="More articles"
+            >
+              {previousArticle ? (
+                <ArticlePostNav
+                  article={previousArticle}
+                  direction="previous"
+                  variant="inline"
+                />
+              ) : (
+                <div className="hidden flex-1 sm:block" aria-hidden />
+              )}
+              {nextArticle ? (
+                <ArticlePostNav
+                  article={nextArticle}
+                  direction="next"
+                  variant="inline"
+                />
+              ) : null}
+            </nav>
+          ) : null}
         </div>
+        </div>
+        </div>
+
+        <aside className="hidden min-h-[120px] lg:block" aria-label="Next article">
+          {nextArticle ? (
+            <ArticlePostNav article={nextArticle} direction="next" />
+          ) : null}
+        </aside>
       </div>
     </article>
   );

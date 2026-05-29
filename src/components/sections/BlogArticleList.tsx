@@ -99,23 +99,23 @@ export function BlogArticleList({ articles }: BlogArticleListProps) {
 
   return (
     <div className="w-full bg-[#f4faf8]">
-      <div className="w-full border-b border-[#005D51]/8 bg-[#eef8f5]">
+      <div className="w-full border-b border-white/10 bg-[#172219]">
         <div className="mx-auto w-full max-w-[1200px] px-5 py-10 sm:px-8 sm:py-12 md:px-10 md:py-14 lg:px-[75px] lg:py-16 xl:max-w-[1320px] xl:px-[120px]">
           <div className="flex w-full flex-col gap-8 md:flex-row md:items-end md:justify-between md:gap-12 lg:gap-16">
             <div className="flex min-w-0 flex-1 flex-col gap-3 md:max-w-none lg:pr-8">
-              <p className="font-poppins text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[#005D51]">
+              <p className="font-poppins text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-white">
                 Read here — no paywall
               </p>
-              <h1 className="font-lora text-2xl font-bold leading-tight tracking-tight text-[#142218] sm:text-3xl lg:text-4xl">
+              <h1 className="font-lora text-2xl font-bold leading-tight tracking-tight text-white sm:text-3xl lg:text-4xl">
                 Blog
               </h1>
-              <p className="max-w-xl font-poppins text-sm leading-relaxed text-[#4d575f] sm:text-base lg:text-[1.05rem]">
+              <p className="max-w-xl font-poppins text-sm leading-relaxed text-white sm:text-base lg:text-[1.05rem]">
                 Long-form pieces meant to be read calmly on this page—stories
                 and ideas from the Emprinte community.
               </p>
             </div>
             <p className="hidden shrink-0 md:block md:max-w-[268px] md:text-right lg:max-w-[320px]">
-              <span className="font-poppins text-xs leading-relaxed text-[#6b757d] lg:text-sm">
+              <span className="font-poppins text-xs leading-relaxed text-white lg:text-sm">
                 Dispatches from real reading rooms—the off-agenda debates,
                 drought weeks nobody talks about, and the small thing that makes
                 someone open the next chapter anyway.

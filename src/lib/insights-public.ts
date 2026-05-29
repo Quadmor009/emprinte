@@ -27,3 +27,21 @@ export async function fetchInsightArticleBySlugParam(
   const list = await fetchInsightArticlesList();
   return list.find((r) => r.slug === param || r.id === param) ?? null;
 }
+
+/** Older / newer neighbors in the public list (newest first). */
+export async function fetchAdjacentInsightArticles(
+  current: InsightArticle,
+): Promise<{
+  previous: InsightArticle | null;
+  next: InsightArticle | null;
+}> {
+  const list = await fetchInsightArticlesList();
+  const index = list.findIndex((a) => a.id === current.id);
+  if (index === -1) {
+    return { previous: null, next: null };
+  }
+  return {
+    previous: list[index + 1] ?? null,
+    next: list[index - 1] ?? null,
+  };
+}

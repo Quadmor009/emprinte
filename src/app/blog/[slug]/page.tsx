@@ -4,7 +4,10 @@ import { notFound } from 'next/navigation';
 import { Header } from '@/components/sections/Header';
 import { Footer } from '@/components/sections/Footer';
 import { BlogPostView } from '@/components/sections/BlogPostView';
-import { fetchInsightArticleBySlugParam } from '@/lib/insights-public';
+import {
+  fetchAdjacentInsightArticles,
+  fetchInsightArticleBySlugParam,
+} from '@/lib/insights-public';
 import { articlePublicPath } from '@/lib/insight-slug';
 import { getPublicSiteOrigin } from '@/lib/public-site-url';
 import { getSiteSettings } from '@/lib/site-settings-server';
@@ -46,11 +49,17 @@ export default async function BlogPostPage({ params }: PageProps) {
   const origin = await getPublicSiteOrigin();
   const pathSeg = articlePublicPath(article);
   const articleUrl = `${origin}/blog/${encodeURIComponent(pathSeg)}`;
+  const { previous, next } = await fetchAdjacentInsightArticles(article);
 
   return (
     <main className="relative flex min-h-screen w-full flex-col bg-white">
       <Header contactEmail={settings.contactInfo.email} />
-      <BlogPostView article={article} articleUrl={articleUrl} />
+      <BlogPostView
+        article={article}
+        articleUrl={articleUrl}
+        previousArticle={previous}
+        nextArticle={next}
+      />
       <Footer contactInfo={settings.contactInfo} />
     </main>
   );

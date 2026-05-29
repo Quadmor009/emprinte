@@ -10,6 +10,7 @@ import {
   getSameOriginApiUrlWithQuery,
   adminJsonHeaders,
 } from '@/lib/api';
+import { validateArticleImageUrl } from '@/lib/article-image-url';
 import {
   insightDateFromInputValue,
   insightDateToInputValue,
@@ -86,6 +87,14 @@ export function useAdminInsights() {
   const submit = useCallback(
     async (e?: FormEvent) => {
       e?.preventDefault();
+
+      const imageError = validateArticleImageUrl(form.image);
+      if (imageError) {
+        setStatus({ type: 'error', message: imageError });
+        toast.error(imageError);
+        return;
+      }
+
       setStatus({ type: 'loading' });
 
       const wasEditing = editingId !== null;

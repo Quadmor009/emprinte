@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { validateArticleImageUrl } from '@/lib/article-image-url';
+
 export const insightSchema = z.object({
   title: z.string().trim().min(1, 'Title is required'),
   description: z.string().trim().min(1, 'Description is required'),
@@ -8,7 +10,15 @@ export const insightSchema = z.object({
     .optional()
     .transform((v) => (v && v.trim() ? v.trim() : undefined)),
   date: z.string().trim().min(1, 'Date is required'),
-  image: z.string().url('Image must be a valid URL'),
+  image: z
+    .string()
+    .url('Image must be a valid URL')
+    .superRefine((val, ctx) => {
+      const msg = validateArticleImageUrl(val);
+      if (msg) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: msg });
+      }
+    }),
   href: z
     .string()
     .optional()

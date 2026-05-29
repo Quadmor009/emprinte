@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import { FaFacebookF, FaLinkedinIn } from 'react-icons/fa';
+import { FaLinkedinIn } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6';
 import { IoLinkOutline } from 'react-icons/io5';
 import { toast } from 'sonner';
@@ -27,7 +27,6 @@ export function ArticleShareBar({
 
   const shareLinkedIn = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
   const shareX = `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`;
-  const shareFacebook = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
 
   const copyLink = useCallback(async () => {
     try {
@@ -73,15 +72,6 @@ export function ArticleShareBar({
               aria-label="Share on X"
             >
               <FaXTwitter className="h-[17px] w-[17px]" aria-hidden />
-            </a>
-            <a
-              href={shareFacebook}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={iconBtn}
-              aria-label="Share on Facebook"
-            >
-              <FaFacebookF className="h-4 w-4" aria-hidden />
             </a>
             <button
               type="button"
