@@ -7,7 +7,7 @@ import { isProbablyRichHtml, sanitizeArticleHtml } from '@/lib/sanitize-article-
 import type { InsightArticle } from '@/types';
 
 const articleLayout =
-  'mx-auto grid w-full max-w-[1100px] grid-cols-1 gap-x-8 px-5 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,680px)_minmax(0,1fr)] lg:gap-x-10 xl:max-w-[1180px]';
+  'mx-auto grid w-full max-w-[1140px] grid-cols-1 gap-x-6 px-5 sm:px-6 lg:grid-cols-[minmax(0,11.75rem)_minmax(0,680px)_minmax(0,11.75rem)] lg:gap-x-8 xl:max-w-[1200px] xl:gap-x-10';
 const articleColumn = 'min-w-0 w-full max-w-[680px] justify-self-center lg:max-w-none';
 
 function authorInitials(authorName: string, authorRole: string): string {
@@ -97,7 +97,7 @@ export function BlogPostView({
     <article className="w-full bg-white">
       <div className={`${articleLayout} pt-7 pb-14 md:pt-9 md:pb-16`}>
         <aside
-          className="hidden min-h-[120px] lg:block"
+          className="hidden pt-1 lg:block lg:self-start"
           aria-label="Previous article"
         >
           {previousArticle ? (
@@ -240,7 +240,7 @@ export function BlogPostView({
         </div>
         </div>
 
-        <aside className="hidden min-h-[120px] lg:block" aria-label="Next article">
+        <aside className="hidden pt-1 lg:block lg:self-start" aria-label="Next article">
           {nextArticle ? (
             <ArticlePostNav article={nextArticle} direction="next" />
           ) : null}

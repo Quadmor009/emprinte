@@ -9,6 +9,9 @@ type ArticlePostNavProps = {
   variant?: 'side' | 'inline';
 };
 
+const cardBase =
+  'group block rounded-xl border border-[#005D51]/10 bg-[#fafcfb] p-4 transition-[border-color,background-color,box-shadow] duration-200 hover:border-[#005D51]/22 hover:bg-white hover:shadow-[0_8px_28px_-18px_rgba(20,34,24,0.18)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#005D51]';
+
 export function ArticlePostNav({
   article,
   direction,
@@ -16,20 +19,42 @@ export function ArticlePostNav({
 }: ArticlePostNavProps) {
   const href = `/blog/${encodeURIComponent(articlePublicPath(article))}`;
   const isPrevious = direction === 'previous';
+  const label = isPrevious ? 'Previous article' : 'Next article';
 
   if (variant === 'inline') {
     return (
       <Link
         href={href}
+        aria-label={`${label}: ${article.title}`}
         className={[
-          'group flex min-w-0 flex-1 flex-col gap-1 rounded-xl border border-[#005D51]/10 bg-[#fafcfb] p-4 transition-colors hover:border-[#005D51]/22 hover:bg-white',
-          isPrevious ? 'items-start text-left' : 'items-end text-right',
+          cardBase,
+          'min-w-0 flex-1',
+          isPrevious ? 'text-left' : 'text-right',
         ].join(' ')}
       >
-        <span className="font-poppins text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-[#005D51]">
-          {isPrevious ? '← Previous' : 'Next →'}
+        <span
+          className={[
+            'flex items-center gap-1.5 font-poppins text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#005D51]',
+            isPrevious ? 'justify-start' : 'justify-end',
+          ].join(' ')}
+        >
+          {isPrevious ? (
+            <>
+              <span aria-hidden className="text-sm leading-none">
+                ←
+              </span>
+              <span>Previous</span>
+            </>
+          ) : (
+            <>
+              <span>Next</span>
+              <span aria-hidden className="text-sm leading-none">
+                →
+              </span>
+            </>
+          )}
         </span>
-        <span className="font-lora text-sm font-medium leading-snug text-[#142218] line-clamp-2 group-hover:text-[#005D51]">
+        <span className="mt-2 block font-lora text-sm font-medium leading-snug text-[#142218] line-clamp-2 group-hover:text-[#005D51]">
           {article.title}
         </span>
       </Link>
@@ -39,22 +64,37 @@ export function ArticlePostNav({
   return (
     <Link
       href={href}
+      aria-label={`${label}: ${article.title}`}
       className={[
-        'group sticky top-28 flex max-w-[9.5rem] flex-col gap-2 py-2 transition-colors',
-        isPrevious ? 'ml-auto items-end text-right' : 'items-start text-left',
+        cardBase,
+        'sticky top-28 w-full max-w-[11.75rem]',
+        isPrevious ? 'ml-auto text-right' : 'mr-auto text-left',
       ].join(' ')}
     >
-      <span className="font-poppins text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-[#005D51]">
-        {isPrevious ? '← Previous' : 'Next →'}
-      </span>
       <span
         className={[
-          'font-lora text-sm leading-snug text-[#5a6570] transition-colors group-hover:text-[#142218]',
-          isPrevious ? '[writing-mode:vertical-rl] rotate-180' : '[writing-mode:vertical-rl]',
+          'flex items-center gap-1.5 font-poppins text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[#005D51]',
+          isPrevious ? 'justify-end' : 'justify-start',
         ].join(' ')}
-        style={{ maxHeight: 'min(42vh, 280px)' }}
       >
-        <span className="line-clamp-6">{article.title}</span>
+        {isPrevious ? (
+          <>
+            <span aria-hidden className="text-sm leading-none">
+              ←
+            </span>
+            <span>Previous</span>
+          </>
+        ) : (
+          <>
+            <span>Next</span>
+            <span aria-hidden className="text-sm leading-none">
+              →
+            </span>
+          </>
+        )}
+      </span>
+      <span className="mt-2.5 block font-lora text-[0.8125rem] leading-[1.45] text-[#4d575f] line-clamp-3 group-hover:text-[#142218]">
+        {article.title}
       </span>
     </Link>
   );
