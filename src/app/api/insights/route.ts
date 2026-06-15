@@ -14,6 +14,7 @@ import {
   replaceInsight,
 } from '@/lib/insights-store';
 import { pickSlugForCreate, pickSlugForUpdate } from '@/lib/insight-slug';
+import { revalidateBlogPages } from '@/lib/revalidate-blog';
 import { requireLandingAdminApiAuth } from '@/lib/supabase-api-auth';
 import { insightSchema, insightUpdateSchema } from '@/lib/validation/admin';
 
@@ -85,10 +86,12 @@ export async function POST(request: Request) {
         { status: 500 },
       );
     }
+    revalidateBlogPages(item);
     return NextResponse.json({ ok: true, data: item }, { status: 201 });
   }
 
   prependInsight(item);
+  revalidateBlogPages(item);
 
   return NextResponse.json({ ok: true, data: item }, { status: 201 });
 }
@@ -150,6 +153,7 @@ export async function PATCH(request: Request) {
         { status: 500 },
       );
     }
+    revalidateBlogPages(item);
     return NextResponse.json({ ok: true, data: item });
   }
 
@@ -172,6 +176,7 @@ export async function PATCH(request: Request) {
   };
 
   replaceInsight(item);
+  revalidateBlogPages(item);
 
   return NextResponse.json({ ok: true, data: item });
 }
@@ -185,18 +190,23 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: 'id query required' }, { status: 400 });
   }
 
+  const idTrimmed = id.trim();
   const dbList = await fetchAllLandingInsightsFromDb();
   if (dbList !== null) {
-    const ok = await deleteLandingInsightFromDb(id.trim());
+    const existing = dbList.find((r) => r.id === idTrimmed);
+    const ok = await deleteLandingInsightFromDb(idTrimmed);
     if (!ok) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
+    revalidateBlogPages(existing);
     return NextResponse.json({ ok: true });
   }
 
-  if (!deleteInsight(id)) {
+  const existing = findInsightById(idTrimmed);
+  if (!deleteInsight(idTrimmed)) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
 
+  revalidateBlogPages(existing);
   return NextResponse.json({ ok: true });
 }

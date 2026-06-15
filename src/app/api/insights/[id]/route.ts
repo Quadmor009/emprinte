@@ -11,6 +11,7 @@ import {
   replaceInsight,
 } from '@/lib/insights-store';
 import { pickSlugForUpdate } from '@/lib/insight-slug';
+import { revalidateBlogPages } from '@/lib/revalidate-blog';
 import { requireLandingAdminApiAuth } from '@/lib/supabase-api-auth';
 import { insightSchema } from '@/lib/validation/admin';
 
@@ -105,6 +106,7 @@ export async function PATCH(
         { status: 500 },
       );
     }
+    revalidateBlogPages(item);
     return NextResponse.json({ ok: true, data: item });
   }
 
@@ -127,6 +129,7 @@ export async function PATCH(
   };
 
   replaceInsight(item);
+  revalidateBlogPages(item);
 
   return NextResponse.json({ ok: true, data: item });
 }

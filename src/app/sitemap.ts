@@ -17,6 +17,8 @@ const STATIC_ROUTES: {
   { path: '/request-account-deletion', changeFrequency: 'yearly', priority: 0.2 },
 ];
 
+export const dynamic = 'force-dynamic';
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const articles = await fetchInsightArticlesList();
   const now = new Date();

@@ -9,6 +9,9 @@ import { blogIndexJsonLd } from '@/lib/seo/json-ld';
 import { buildPageMetadata } from '@/lib/seo/site';
 import { getSiteSettings } from '@/lib/site-settings-server';
 
+/** Blog posts are added in admin after deploy — do not freeze the list at build time. */
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = buildPageMetadata({
   title: 'Blog',
   description:

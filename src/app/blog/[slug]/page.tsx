@@ -19,6 +19,9 @@ import {
 import { absoluteUrl, articleDateToIso, buildPageMetadata } from '@/lib/seo/site';
 import { getSiteSettings } from '@/lib/site-settings-server';
 
+/** New and updated posts must be readable without a full redeploy. */
+export const dynamic = 'force-dynamic';
+
 type PageProps = {
   params: Promise<{ slug: string }>;
 };

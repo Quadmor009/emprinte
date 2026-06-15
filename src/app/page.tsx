@@ -17,6 +17,9 @@ import { organizationJsonLd, webSiteJsonLd } from '@/lib/seo/json-ld';
 import { buildPageMetadata } from '@/lib/seo/site';
 import { getSiteSettings } from '@/lib/site-settings-server';
 
+/** Homepage blog preview should reflect posts published after the last build. */
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = buildPageMetadata({
   title: 'Transforming Africa, One Book at a Time',
   description:
