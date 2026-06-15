@@ -12,21 +12,21 @@ const HERO_PHOTOS = [
     src: '/hero1.png',
     alt: 'Emprinte reader with books at a community reading event',
     className:
-      'absolute left-0 top-[101px] lg:top-[140px] xl:top-[264px] w-[153px] lg:w-[240px] lg:h-[360px] xl:w-[282px] xl:h-[460px] h-[266px] object-cover rounded-[2162px_2162px_13px_13px] border border-white',
+      'absolute left-0 top-[109px] lg:top-[148px] xl:top-[272px] w-[153px] lg:w-[240px] lg:h-[360px] xl:w-[282px] xl:h-[460px] h-[266px] overflow-hidden object-cover rounded-[2162px_2162px_13px_13px] border border-white',
     delayMs: 0,
   },
   {
     src: '/hero2.png',
     alt: 'Young reader smiling while holding a book outdoors',
     className:
-      'absolute left-[65px] xl:left-[121px] top-0 w-[153px] lg:w-[240px] lg:h-[360px] xl:w-[282px] xl:h-[460px] h-[249px] object-cover rounded-[0_0_2162px_2162px] border border-white',
+      'absolute left-[65px] xl:left-[121px] top-2 lg:top-2 xl:top-2 w-[153px] lg:w-[240px] lg:h-[360px] xl:w-[282px] xl:h-[460px] h-[249px] overflow-hidden object-cover rounded-[0_0_2162px_2162px] border border-white',
     delayMs: 120,
   },
   {
     src: '/hero3.png',
     alt: 'Emprinte book club member reading with friends',
     className:
-      'absolute left-[188px] xl:left-[350px] top-[57px] xl:top-[101px] w-[153px] lg:w-[240px] lg:h-[360px] xl:w-[282px] xl:h-[460px] h-[263px] object-cover rounded-[2162px_2162px_13px_13px] border border-white',
+      'absolute left-[188px] xl:left-[350px] top-[65px] xl:top-[109px] w-[153px] lg:w-[240px] lg:h-[360px] xl:w-[282px] xl:h-[460px] h-[263px] overflow-hidden object-cover rounded-[2162px_2162px_13px_13px] border border-white',
     delayMs: 240,
   },
 ] as const;
@@ -38,7 +38,7 @@ export function Hero() {
       <div className="max-w-[390px] md:max-w-7xl mx-auto flex flex-col items-center gap-6 md:gap-12 flex-1 ">
         <div className="w-full pb-6 flex flex-col md:flex-row-reverse items-start md:items-center justify-between gap-5 md:gap-12 lg:gap-16">
           <div
-            className="relative w-full h-[367px] lg:h-[500px] xl:h-[746px] lg:w-[450px] xl:w-[630px]"
+            className="relative w-full h-[399px] shrink-0 overflow-visible lg:h-[532px] xl:h-[778px] lg:w-[450px] xl:w-[630px]"
             aria-label="Emprinte Readers Hub members reading together"
           >
             {HERO_PHOTOS.map((photo) => (
