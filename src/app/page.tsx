@@ -8,7 +8,7 @@ import { BookClub } from '@/components/sections/BookClub';
 import { Header } from '@/components/sections/Header';
 import { Footer } from '@/components/sections/Footer';
 import { Stats } from '@/components/sections/Stats';
-import { ExclusiveWorkshop } from '@/components/sections/ExclusiveWorkshop';
+import { IgniteBanner } from '@/components/sections/IgniteBanner';
 import { Hero } from '@/components/sections/Hero';
 import { Insights } from '@/components/sections/Insights';
 import { JsonLd } from '@/components/seo/JsonLd';
@@ -35,7 +35,9 @@ export default async function Home() {
         <Header contactEmail={settings.contactInfo.email} />
         <Hero />
         <Stats />
-        <ExclusiveWorkshop />
+      </div>
+      <IgniteBanner contactEmail={settings.contactInfo.email} />
+      <div className="w-full max-w-full overflow-x-visible md:max-w-7xl lg:max-w-full">
         <BookClub />
         <Initiatives />
         <Bootcamps />
